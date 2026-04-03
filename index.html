@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selected Club</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg,#08142b,#020617);
+  color:white;
+}
+
+.container { max-width:500px; margin:auto; padding:20px; }
+.center { text-align:center; }
+
+.logo {
+  width:80px; height:80px;
+  border:2px solid #d4af37;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin:20px auto;
+  font-size:28px;
+  color:#d4af37;
+}
+
+.card {
+  background:#0f1c35;
+  padding:20px;
+  border-radius:16px;
+  margin-top:20px;
+}
+
+.block {
+  background:#0a1630;
+  padding:14px;
+  border-radius:12px;
+  margin-top:14px;
+}
+
+.input {
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:none;
+  background:#08142b;
+  color:white;
+  margin-top:12px;
+}
+
+.btn {
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:12px;
+  margin-top:16px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.primary { background:#d4af37; color:black; }
+.green { background:#2ecc71; color:white; }
+.dark { background:#1c2a4a; color:white; }
+
+.option {
+  padding:14px;
+  border:1px solid #1c2a4a;
+  border-radius:10px;
+  margin-top:10px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.correct { border:1px solid #2ecc71; background:rgba(46,204,113,0.15); }
+.wrong { border:1px solid #e74c3c; background:rgba(231,76,60,0.15); }
+
+.qty {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.qty button {
+  width:40px;
+  height:40px;
+  border:none;
+  border-radius:10px;
+  background:#1c2a4a;
+  color:white;
+  font-size:18px;
+}
+
+.odds {
+  color:#d4af37;
+  font-weight:bold;
+}
+
+.small {
+  opacity:0.7;
+  font-size:13px;
+  margin-top:8px;
+}
+
+.section-title {
+  margin-top:40px;
+  font-size:22px;
+}
+
+/* Popup */
+.popup {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.popup-box {
+  background:#0f1c35;
+  padding:20px;
+  border-radius:16px;
+  max-width:400px;
+  width:100%;
+  position:relative;
+}
+
+.close {
+  position:absolute;
+  top:10px;
+  right:10px;
+  cursor:pointer;
+  font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="center">
+  <div class="logo">S</div>
+  <h2>SELECTED CLUB</h2>
+  <h1>£1000 Selected Draw</h1>
+  <div class="small">250 entries • £6 per entry</div>
+</div>
+
+<!-- MAIN DRAW -->
+<div class="card">
+
+<div class="block">
+Choose entries
+<div class="qty">
+<button onclick="change(-1)">-</button>
+<div id="qty">1</div>
+<button onclick="change(1)">+</button>
+</div>
+</div>
+
+<div class="block">
+<div id="odds" class="odds">1 entry → 1 in 250</div>
+</div>
+
+<div class="block main-q">
+Skill question
+<div class="option" onclick="selectAnswer(this,false)">Z</div>
+<div class="option" onclick="selectAnswer(this,true)">A</div>
+<div class="option" onclick="selectAnswer(this,false)">M</div>
+<div class="small">Which comes first in the alphabet?</div>
+</div>
+
+<input class="input" placeholder="Full name">
+<input class="input" placeholder="Email">
+<input class="input" placeholder="Mobile number">
+
+<button class="btn primary" onclick="startCheckout()">Continue</button>
+
+</div>
+
+<!-- DROPS -->
+<div class="section-title">Selected Drops</div>
+
+<div class="card">
+
+<div class="small">
+Each drop runs between 80–120 entries.<br><br>
+Every round produces a winner instantly.<br><br>
+Typical payout £160–£240.<br><br>
+Unlimited rounds depending on demand.
+</div>
+
+<div class="block">
+Choose entries
+<div class="qty">
+<button onclick="changeDrop(-1)">-</button>
+<div id="dropQty">0</div>
+<button onclick="changeDrop(1)">+</button>
+</div>
+</div>
+
+<div class="block drop-q">
+Skill question
+<div class="option" onclick="selectDrop(this,false)">7</div>
+<div class="option" onclick="selectDrop(this,true)">5</div>
+<div class="option" onclick="selectDrop(this,false)">9</div>
+<div class="small">What is 2 + 3?</div>
+</div>
+
+<input class="input" placeholder="Full name">
+<input class="input" placeholder="Email">
+<input class="input" placeholder="Mobile number">
+
+<button class="btn green" onclick="goToCheckout()">Enter Drop (£3)</button>
+
+</div>
+
+<!-- TERMS -->
+<div class="section-title">Terms & Conditions</div>
+
+<div class="card small">
+Max 5 entries per person.<br><br>
+250 total entries per draw.<br><br>
+Skill question required.<br><br>
+Selected Drops operate independently.<br><br>
+Winners selected at random.<br><br>
+Average payout £160–£240.
+</div>
+
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="popup">
+<div class="popup-box">
+
+<div class="close" onclick="closePopup()">✕</div>
+
+<h3>Add Selected Drop before checkout?</h3>
+
+<div id="summary" class="small"></div>
+
+<button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
+<button class="btn green" onclick="addDrop(3)">Add 3 (£9)</button>
+<button class="btn dark" onclick="goToCheckout()">Skip & continue</button>
+
+</div>
+</div>
+
+<script>
+let qty=1;
+let dropQty=0;
+let correct=false;
+let dropCorrect=false;
+
+function change(v){
+  qty+=v;
+  if(qty<1) qty=1;
+  if(qty>5) qty=5;
+  document.getElementById("qty").innerText=qty;
+  document.getElementById("odds").innerText=qty+" entry → 1 in "+Math.floor(250/qty);
+}
+
+function changeDrop(v){
+  dropQty+=v;
+  if(dropQty<0) dropQty=0;
+  document.getElementById("dropQty").innerText=dropQty;
+}
+
+function selectAnswer(el,isCorrect){
+  document.querySelectorAll(".main-q .option").forEach(o=>o.classList.remove("correct","wrong"));
+  if(isCorrect){el.classList.add("correct");correct=true;}
+  else{el.classList.add("wrong");correct=false;}
+}
+
+function selectDrop(el,isCorrect){
+  document.querySelectorAll(".drop-q .option").forEach(o=>o.classList.remove("correct","wrong"));
+  if(isCorrect){el.classList.add("correct");dropCorrect=true;}
+  else{el.classList.add("wrong");dropCorrect=false;}
+}
+
+function startCheckout(){
+  if(!correct){
+    alert("Answer correctly first");
+    return;
+  }
+
+  document.getElementById("summary").innerText =
+  "You’ve added "+qty+" main draw entr"+(qty>1?"ies":"y")+".\n\n"+
+  "Want to try Selected Drops?\n\n"+
+  "Every 80–120 tickets produces a winner.\n"+
+  "Typical payout £160–£240.\n\n"+
+  "See Selected Drops section for full rules.";
+
+  document.getElementById("popup").style.display="flex";
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+function addDrop(n){
+  dropQty+=n;
+  goToCheckout();
+}
+
+function goToCheckout(){
+
+  if(dropQty>0 && !dropCorrect){
+    alert("Answer drop question correctly");
+    return;
+  }
+
+  const MAIN="https://buy.stripe.com/6oUcMXeGJ1pYfL92pC4Ni05";
+  const DROP="https://buy.stripe.com/00wcMX5698Sq8iH1ly4Ni06";
+
+  if(dropQty>0){
+    window.location.href=DROP;
+  } else {
+    window.location.href=MAIN;
+  }
+}
+</script>
+
+</body>
+</html>
