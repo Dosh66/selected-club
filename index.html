@@ -92,11 +92,23 @@ body {
   font-size:18px;
 }
 
-.odds { color:#d4af37; font-weight:bold; }
+.odds {
+  color:#d4af37;
+  font-weight:bold;
+}
 
-.small { opacity:0.7; font-size:13px; margin-top:8px; }
+.small {
+  opacity:0.7;
+  font-size:13px;
+  margin-top:8px;
+}
 
-.section-title { margin-top:40px; font-size:22px; }
+.section-title {
+  margin-top:40px;
+  font-size:22px;
+}
+
+.hidden { display:none; }
 
 .popup {
   position:fixed;
@@ -145,26 +157,22 @@ body {
 Choose entries
 <div class="qty">
 <button onclick="change(-1)">-</button>
-<div id="qty">1</div>
+<div id="qty">0</div>
 <button onclick="change(1)">+</button>
 </div>
 </div>
 
 <div class="block">
-<div id="odds" class="odds">1 entry → 1 in 250</div>
+<div id="odds" class="odds">No entries selected</div>
 </div>
 
-<div class="block main-q">
+<div class="block main-q hidden" id="mainQ">
 Skill question
 <div class="option" onclick="selectAnswer(this,false)">Z</div>
 <div class="option" onclick="selectAnswer(this,true)">A</div>
 <div class="option" onclick="selectAnswer(this,false)">M</div>
 <div class="small">Which comes first in the alphabet?</div>
 </div>
-
-<input class="input" placeholder="Full name">
-<input class="input" placeholder="Email">
-<input class="input" placeholder="Mobile number">
 
 <button class="btn primary" onclick="startCheckout()">Continue</button>
 
@@ -174,13 +182,6 @@ Skill question
 <div class="section-title">Selected Drops</div>
 
 <div class="card">
-
-<div class="small">
-Each drop runs between 80–120 entries.<br><br>
-Every round produces a winner instantly.<br><br>
-Typical payout £160–£240.<br><br>
-Unlimited rounds depending on demand.
-</div>
 
 <div class="block">
 Choose entries
@@ -199,24 +200,8 @@ Skill question
 <div class="small">What is 2 + 3?</div>
 </div>
 
-<input class="input" placeholder="Full name">
-<input class="input" placeholder="Email">
-<input class="input" placeholder="Mobile number">
+<button class="btn green" onclick="goToCheckout()">Enter Drop</button>
 
-<button class="btn green" onclick="goToCheckout()">Enter Drop (£3)</button>
-
-</div>
-
-<!-- TERMS -->
-<div class="section-title">Terms & Conditions</div>
-
-<div class="card small">
-Max 5 entries per person.<br><br>
-250 total entries per draw.<br><br>
-Skill question required.<br><br>
-Selected Drops operate independently.<br><br>
-Winners selected at random.<br><br>
-Average payout £160–£240.
 </div>
 
 </div>
@@ -227,30 +212,45 @@ Average payout £160–£240.
 
 <div class="close" onclick="closePopup()">✕</div>
 
-<h3>Add Selected Drop before checkout?</h3>
+<h3>Add Selected Drop?</h3>
 
-<div id="summary" class="small"></div>
+<div class="block">
+Skill question
+<div class="option" onclick="selectPopupDrop(this,false)">7</div>
+<div class="option" onclick="selectPopupDrop(this,true)">5</div>
+<div class="option" onclick="selectPopupDrop(this,false)">9</div>
+</div>
 
 <button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
 <button class="btn green" onclick="addDrop(3)">Add 3 (£9)</button>
-<button class="btn dark" onclick="goToCheckout()">Skip & continue</button>
+<button class="btn dark" onclick="goToCheckout()">Skip</button>
 
 </div>
 </div>
 
 <script>
-let qty = 1;
+let qty = 0;
 let dropQty = 0;
 let correct = false;
 let dropCorrect = false;
+let popupCorrect = false;
 
 function change(v){
   qty += v;
-  if(qty < 1) qty = 1;
+  if(qty < 0) qty = 0;
   if(qty > 5) qty = 5;
+
   document.getElementById("qty").innerText = qty;
-  document.getElementById("odds").innerText =
-    qty + " entry → 1 in " + Math.floor(250 / qty);
+
+  if(qty > 0){
+    document.getElementById("odds").innerText =
+      qty + " entry → 1 in " + Math.floor(250/qty);
+    document.getElementById("mainQ").classList.remove("hidden");
+  } else {
+    document.getElementById("odds").innerText = "No entries selected";
+    document.getElementById("mainQ").classList.add("hidden");
+    correct = false;
+  }
 }
 
 function changeDrop(v){
@@ -260,94 +260,71 @@ function changeDrop(v){
 }
 
 function selectAnswer(el,isCorrect){
-  document.querySelectorAll(".main-q .option")
-    .forEach(o=>o.classList.remove("correct","wrong"));
-
-  if(isCorrect){
-    el.classList.add("correct");
-    correct = true;
-  } else {
-    el.classList.add("wrong");
-    correct = false;
-  }
+  document.querySelectorAll(".main-q .option").forEach(o=>o.classList.remove("correct","wrong"));
+  if(isCorrect){el.classList.add("correct");correct=true;}
+  else{el.classList.add("wrong");correct=false;}
 }
 
 function selectDrop(el,isCorrect){
-  document.querySelectorAll(".drop-q .option")
-    .forEach(o=>o.classList.remove("correct","wrong"));
+  document.querySelectorAll(".drop-q .option").forEach(o=>o.classList.remove("correct","wrong"));
+  if(isCorrect){el.classList.add("correct");dropCorrect=true;}
+  else{el.classList.add("wrong");dropCorrect=false;}
+}
 
-  if(isCorrect){
-    el.classList.add("correct");
-    dropCorrect = true;
-  } else {
-    el.classList.add("wrong");
-    dropCorrect = false;
-  }
+function selectPopupDrop(el,isCorrect){
+  document.querySelectorAll("#popup .option").forEach(o=>o.classList.remove("correct","wrong"));
+  if(isCorrect){el.classList.add("correct");popupCorrect=true;dropCorrect=true;}
+  else{el.classList.add("wrong");popupCorrect=false;dropCorrect=false;}
 }
 
 function startCheckout(){
-  if(!correct){
-    alert("Answer correctly first");
+  if(qty === 0){
+    alert("Select entries first");
     return;
   }
-
-  document.getElementById("summary").innerText =
-    "You’ve added " + qty + " main draw entr" + (qty>1?"ies":"y") + ".\n\n" +
-    "Add a Selected Drop?\n\n" +
-    "Every 80–120 tickets produces a winner.\n" +
-    "Average payout £160–£240.";
-
-  document.getElementById("popup").style.display = "flex";
+  if(!correct){
+    alert("Answer question");
+    return;
+  }
+  document.getElementById("popup").style.display="flex";
 }
 
 function closePopup(){
-  document.getElementById("popup").style.display = "none";
+  document.getElementById("popup").style.display="none";
 }
 
-/* FIXED */
 function addDrop(n){
+  if(!popupCorrect){
+    alert("Answer drop question");
+    return;
+  }
   dropQty += n;
-  dropCorrect = true;
-  closePopup();
-  pay();
+  goToCheckout();
 }
 
-/* PROPER CHECKOUT */
-async function pay(){
-
-  if(!correct){
-    alert("Answer correctly first");
+async function goToCheckout(){
+  if(qty > 0 && !correct){
+    alert("Answer main question");
     return;
   }
-
   if(dropQty > 0 && !dropCorrect){
-    alert("Answer drop question correctly");
+    alert("Answer drop question");
     return;
   }
 
-  let res = await fetch("/.netlify/functions/create-checkout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      mainQty: qty,
-      dropQty: dropQty
-    })
+  const res = await fetch("/.netlify/functions/create-checkout",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({mainQty:qty, dropQty:dropQty})
   });
 
-  let data = await res.json();
+  const data = await res.json();
 
   if(data.url){
     window.location.href = data.url;
-  } else {k
-    alert("Checkout error");n
-    console.log(data);
+  } else {
+    alert("Checkout error");
   }
-}
-
-function goToCheckout(){
-  pay();
 }
 </script>
 
