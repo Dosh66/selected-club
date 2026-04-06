@@ -30,7 +30,7 @@ body {
   background:#0f1c35;
   padding:20px;
   border-radius:16px;
-  margin-top:20px;
+  margin-top:25px;
 }
 
 .block {
@@ -84,7 +84,7 @@ body {
 
 .odds { color:#d4af37; font-weight:bold; }
 .small { opacity:0.7; font-size:13px; margin-top:8px; }
-.section-title { margin-top:40px; font-size:22px; }
+.section-title { margin-top:50px; font-size:22px; }
 
 .popup {
   position:fixed;
@@ -123,6 +123,7 @@ body {
   <h2>SELECTED CLUB</h2>
   <h1>£1000 Selected Draw</h1>
   <div class="small">250 entries • £6 per entry</div>
+  <div class="small">Only 250 total entries</div>
 </div>
 
 <!-- MAIN DRAW -->
@@ -139,14 +140,15 @@ Choose entries
 
 <div class="block">
 <div id="odds" class="odds">No entries selected</div>
+<div id="total" class="odds">Total: £0</div>
 </div>
 
 <div class="block" id="mainQ" style="display:none;">
-Skill question
+<div style="font-weight:bold;">Skill question</div>
+<div class="small">Which comes first in the alphabet?</div>
 <div class="option" onclick="selectAnswer(this,false)">Z</div>
 <div class="option" onclick="selectAnswer(this,true)">A</div>
 <div class="option" onclick="selectAnswer(this,false)">M</div>
-<div class="small">Which comes first in the alphabet?</div>
 </div>
 
 <button class="btn primary" onclick="startCheckout()">Continue</button>
@@ -167,13 +169,12 @@ Choose entries
 </div>
 </div>
 
-<!-- ✅ PROPERLY CONTROLLED -->
 <div class="block" id="dropQ" style="display:none;">
-Skill question
+<div style="font-weight:bold;">Skill question</div>
+<div class="small">What is 2 + 3?</div>
 <div class="option" onclick="selectDrop(this,false)">7</div>
 <div class="option" onclick="selectDrop(this,true)">5</div>
 <div class="option" onclick="selectDrop(this,false)">9</div>
-<div class="small">What is 2 + 3?</div>
 </div>
 
 <button class="btn green" onclick="goToCheckout()">Enter Drop</button>
@@ -190,8 +191,11 @@ Selected Drops are separate draws (£3 per entry).<br><br>
 Each drop runs 80–120 entries.<br><br>
 Winners selected at random.<br><br>
 Skill question required.<br><br>
-Typical drop payout £160–£240.<br><br>
-Winners contacted directly.
+Typical drop payout £160–£240.
+</div>
+
+<div class="small" style="text-align:center; margin-top:20px;">
+Secure checkout powered by Stripe 🔒
 </div>
 
 </div>
@@ -205,22 +209,26 @@ Winners contacted directly.
 <h3>Review your order</h3>
 
 <p class="small">
-You've selected tickets for the £1000 main draw.<br><br>
-Would you like to also try a Selected Drop?<br><br>
-Every 80–120 tickets someone wins instantly.<br>
+You're entering the £1000 main draw 🎯<br><br>
+
+Want to boost your chances?<br><br>
+
+Selected Drops produce winners instantly every 80–120 entries.<br>
 Typical payout £160–£240 💸<br><br>
-Answer the question and choose tickets below 👇
+
+Add entries below before checkout 👇
 </p>
 
 <div class="block">
-Skill question
+<div style="font-weight:bold;">Skill question</div>
+<div class="small">What is 2 + 3?</div>
 <div class="option" onclick="selectPopupDrop(this,false)">7</div>
 <div class="option" onclick="selectPopupDrop(this,true)">5</div>
 <div class="option" onclick="selectPopupDrop(this,false)">9</div>
 </div>
 
-<button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
-<button class="btn green" onclick="addDrop(3)">Add 3 (£9)</button>
+<button class="btn green" onclick="addDrop(1)">Add 1 Entry (£3)</button>
+<button class="btn green" onclick="addDrop(3)">Add 3 Entries (£9) – Best Value</button>
 <button class="btn dark" onclick="goToCheckout()">No thanks</button>
 
 </div>
@@ -233,7 +241,11 @@ let correct = false;
 let dropCorrect = false;
 let popupCorrect = false;
 
-// MAIN
+function updateTotal(){
+  document.getElementById("total").innerText =
+  "Total: £" + (qty*6 + dropQty*3);
+}
+
 function change(v){
   qty += v;
   if(qty < 0) qty = 0;
@@ -252,9 +264,10 @@ function change(v){
     mainQ.style.display = "none";
     correct = false;
   }
+
+  updateTotal();
 }
 
-// ✅ GUARANTEED FIX
 function changeDrop(v){
   dropQty += v;
   if(dropQty < 0) dropQty = 0;
@@ -269,9 +282,10 @@ function changeDrop(v){
     dropQ.style.display = "none";
     dropCorrect = false;
   }
+
+  updateTotal();
 }
 
-// answers
 function selectAnswer(el,isCorrect){
   document.querySelectorAll("#mainQ .option").forEach(o=>o.classList.remove("correct","wrong"));
   if(isCorrect){el.classList.add("correct");correct=true;}
@@ -287,10 +301,9 @@ function selectDrop(el,isCorrect){
 function selectPopupDrop(el,isCorrect){
   document.querySelectorAll("#popup .option").forEach(o=>o.classList.remove("correct","wrong"));
   if(isCorrect){el.classList.add("correct");popupCorrect=true;dropCorrect=true;}
-  else{el.classList.add("wrong");popupCorrect=false;dropCorrect=false;}
+  else{el.classList.add("wrong");popupCorrect=false;}
 }
 
-// popup
 function startCheckout(){
   if(qty === 0){
     alert("Select entries first");
@@ -316,7 +329,6 @@ function addDrop(n){
   goToCheckout();
 }
 
-// checkout
 async function goToCheckout(){
   if(qty > 0 && !correct){
     alert("Answer main question");
@@ -342,7 +354,6 @@ async function goToCheckout(){
   }
 }
 
-// 🔥 FORCE HIDE (ABSOLUTE)
 document.addEventListener("DOMContentLoaded", function(){
   document.getElementById("dropQ").style.display = "none";
 });
