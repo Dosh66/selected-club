@@ -92,23 +92,12 @@ body {
   font-size:18px;
 }
 
-.odds {
-  color:#d4af37;
-  font-weight:bold;
-}
+.odds { color:#d4af37; font-weight:bold; }
 
-.small {
-  opacity:0.7;
-  font-size:13px;
-  margin-top:8px;
-}
+.small { opacity:0.7; font-size:13px; margin-top:8px; }
 
-.section-title {
-  margin-top:40px;
-  font-size:22px;
-}
+.section-title { margin-top:40px; font-size:22px; }
 
-/* Popup */
 .popup {
   position:fixed;
   inset:0;
@@ -250,35 +239,50 @@ Average payout £160–£240.
 </div>
 
 <script>
-let qty=1;
-let dropQty=0;
-let correct=false;
-let dropCorrect=false;
+let qty = 1;
+let dropQty = 0;
+let correct = false;
+let dropCorrect = false;
 
 function change(v){
-  qty+=v;
-  if(qty<1) qty=1;
-  if(qty>5) qty=5;
-  document.getElementById("qty").innerText=qty;
-  document.getElementById("odds").innerText=qty+" entry → 1 in "+Math.floor(250/qty);
+  qty += v;
+  if(qty < 1) qty = 1;
+  if(qty > 5) qty = 5;
+  document.getElementById("qty").innerText = qty;
+  document.getElementById("odds").innerText =
+    qty + " entry → 1 in " + Math.floor(250 / qty);
 }
 
 function changeDrop(v){
-  dropQty+=v;
-  if(dropQty<0) dropQty=0;
-  document.getElementById("dropQty").innerText=dropQty;
+  dropQty += v;
+  if(dropQty < 0) dropQty = 0;
+  document.getElementById("dropQty").innerText = dropQty;
 }
 
 function selectAnswer(el,isCorrect){
-  document.querySelectorAll(".main-q .option").forEach(o=>o.classList.remove("correct","wrong"));
-  if(isCorrect){el.classList.add("correct");correct=true;}
-  else{el.classList.add("wrong");correct=false;}
+  document.querySelectorAll(".main-q .option")
+    .forEach(o=>o.classList.remove("correct","wrong"));
+
+  if(isCorrect){
+    el.classList.add("correct");
+    correct = true;
+  } else {
+    el.classList.add("wrong");
+    correct = false;
+  }
 }
 
 function selectDrop(el,isCorrect){
-  document.querySelectorAll(".drop-q .option").forEach(o=>o.classList.remove("correct","wrong"));
-  if(isCorrect){el.classList.add("correct");dropCorrect=true;}
-  else{el.classList.add("wrong");dropCorrect=false;}
+  document.querySelectorAll(".drop-q .option")
+    .forEach(o=>o.classList.remove("correct","wrong"));
+
+  if(isCorrect){
+    el.classList.add("correct");
+    dropCorrect = true;
+  } else {
+    el.classList.add("wrong");
+    dropCorrect = false;
+  }
 }
 
 function startCheckout(){
@@ -288,41 +292,64 @@ function startCheckout(){
   }
 
   document.getElementById("summary").innerText =
-  "You’ve added "+qty+" main draw entr"+(qty>1?"ies":"y")+".\n\n"+
-  "Want to try Selected Drops?\n\n"+
-  "Every 80–120 tickets produces a winner.\n"+
-  "Typical payout £160–£240.\n\n"+
-  "See Selected Drops section for full rules.";
+    "You’ve added " + qty + " main draw entr" + (qty>1?"ies":"y") + ".\n\n" +
+    "Add a Selected Drop?\n\n" +
+    "Every 80–120 tickets produces a winner.\n" +
+    "Average payout £160–£240.";
 
-  document.getElementById("popup").style.display="flex";
+  document.getElementById("popup").style.display = "flex";
 }
 
 function closePopup(){
-  document.getElementById("popup").style.display="none";
+  document.getElementById("popup").style.display = "none";
 }
 
+/* FIXED */
 function addDrop(n){
-  dropQty+=n;
-  goToCheckout();
+  dropQty += n;
+  dropCorrect = true;
+  closePopup();
+  pay();
 }
 
-function goToCheckout(){
+/* PROPER CHECKOUT */
+async function pay(){
 
-  if(dropQty>0 && !dropCorrect){
+  if(!correct){
+    alert("Answer correctly first");
+    return;
+  }
+
+  if(dropQty > 0 && !dropCorrect){
     alert("Answer drop question correctly");
     return;
   }
 
-  const MAIN="https://buy.stripe.com/6oUcMXeGJ1pYfL92pC4Ni05";
-  const DROP="https://buy.stripe.com/00wcMX5698Sq8iH1ly4Ni06";
+  let res = await fetch("/.netlify/functions/create-checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      mainQty: qty,
+      dropQty: dropQty
+    })
+  });
 
-  if(dropQty>0){
-    window.location.href=DROP;
+  let data = await res.json();
+
+  if(data.url){
+    window.location.href = data.url;
   } else {
-    window.location.href=MAIN;
+    alert("Checkout error");
+    console.log(data);
   }
+}
+
+function goToCheckout(){
+  pay();
 }
 </script>
 
 </body>
-</html>u
+</html>
