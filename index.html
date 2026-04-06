@@ -1,4 +1,3 @@
-<h1 style="color:red;">TEST VERSION</h1>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,7 +85,6 @@ body {
 .odds { color:#d4af37; font-weight:bold; }
 .small { opacity:0.7; font-size:13px; margin-top:8px; }
 .section-title { margin-top:40px; font-size:22px; }
-.hidden { display:none; }
 
 .popup {
   position:fixed;
@@ -104,10 +102,13 @@ body {
   border-radius:16px;
   max-width:400px;
   width:100%;
+  position:relative;
 }
 
 .close {
-  float:right;
+  position:absolute;
+  right:15px;
+  top:10px;
   cursor:pointer;
 }
 </style>
@@ -140,7 +141,7 @@ Choose entries
 <div id="odds" class="odds">No entries selected</div>
 </div>
 
-<div id="mainQ" class="block hidden">
+<div class="block" id="mainQ" style="display:none;">
 Skill question
 <div class="option" onclick="selectAnswer(this,false)">Z</div>
 <div class="option" onclick="selectAnswer(this,true)">A</div>
@@ -166,7 +167,8 @@ Choose entries
 </div>
 </div>
 
-<div class="block">
+<!-- ✅ PROPERLY CONTROLLED -->
+<div class="block" id="dropQ" style="display:none;">
 Skill question
 <div class="option" onclick="selectDrop(this,false)">7</div>
 <div class="option" onclick="selectDrop(this,true)">5</div>
@@ -202,21 +204,19 @@ Winners contacted directly.
 
 <h3>Review your order</h3>
 
-<div id="summary" class="small"></div>
-
-<div class="small">
-You’ve entered our £1000 main draw 🎯<br><br>
+<p class="small">
+You've selected tickets for the £1000 main draw.<br><br>
 Would you like to also try a Selected Drop?<br><br>
 Every 80–120 tickets someone wins instantly.<br>
 Typical payout £160–£240 💸<br><br>
 Answer the question and choose tickets below 👇
-</div>
+</p>
 
 <div class="block">
 Skill question
-<div class="option" onclick="selectPopup(this,false)">7</div>
-<div class="option" onclick="selectPopup(this,true)">5</div>
-<div class="option" onclick="selectPopup(this,false)">9</div>
+<div class="option" onclick="selectPopupDrop(this,false)">7</div>
+<div class="option" onclick="selectPopupDrop(this,true)">5</div>
+<div class="option" onclick="selectPopupDrop(this,false)">9</div>
 </div>
 
 <button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
@@ -227,13 +227,13 @@ Skill question
 </div>
 
 <script>
-
 let qty = 0;
 let dropQty = 0;
 let correct = false;
 let dropCorrect = false;
 let popupCorrect = false;
 
+// MAIN
 function change(v){
   qty += v;
   if(qty < 0) qty = 0;
@@ -241,23 +241,37 @@ function change(v){
 
   document.getElementById("qty").innerText = qty;
 
+  const mainQ = document.getElementById("mainQ");
+
   if(qty > 0){
     document.getElementById("odds").innerText =
       qty + " entry → 1 in " + Math.floor(250/qty);
-    document.getElementById("mainQ").classList.remove("hidden");
+    mainQ.style.display = "block";
   } else {
     document.getElementById("odds").innerText = "No entries selected";
-    document.getElementById("mainQ").classList.add("hidden");
+    mainQ.style.display = "none";
     correct = false;
   }
 }
 
+// ✅ GUARANTEED FIX
 function changeDrop(v){
   dropQty += v;
   if(dropQty < 0) dropQty = 0;
+
   document.getElementById("dropQty").innerText = dropQty;
+
+  const dropQ = document.getElementById("dropQ");
+
+  if(dropQty > 0){
+    dropQ.style.display = "block";
+  } else {
+    dropQ.style.display = "none";
+    dropCorrect = false;
+  }
 }
 
+// answers
 function selectAnswer(el,isCorrect){
   document.querySelectorAll("#mainQ .option").forEach(o=>o.classList.remove("correct","wrong"));
   if(isCorrect){el.classList.add("correct");correct=true;}
@@ -265,30 +279,27 @@ function selectAnswer(el,isCorrect){
 }
 
 function selectDrop(el,isCorrect){
-  document.querySelectorAll(".card .option").forEach(o=>o.classList.remove("correct","wrong"));
+  document.querySelectorAll("#dropQ .option").forEach(o=>o.classList.remove("correct","wrong"));
   if(isCorrect){el.classList.add("correct");dropCorrect=true;}
   else{el.classList.add("wrong");dropCorrect=false;}
 }
 
-function selectPopup(el,isCorrect){
+function selectPopupDrop(el,isCorrect){
   document.querySelectorAll("#popup .option").forEach(o=>o.classList.remove("correct","wrong"));
   if(isCorrect){el.classList.add("correct");popupCorrect=true;dropCorrect=true;}
   else{el.classList.add("wrong");popupCorrect=false;dropCorrect=false;}
 }
 
+// popup
 function startCheckout(){
   if(qty === 0){
     alert("Select entries first");
     return;
   }
   if(!correct){
-    alert("Answer main question");
+    alert("Answer question");
     return;
   }
-
-  document.getElementById("summary").innerText =
-  "You’ve selected " + qty + " ticket(s) for the £1000 draw.";
-
   document.getElementById("popup").style.display="flex";
 }
 
@@ -305,20 +316,14 @@ function addDrop(n){
   goToCheckout();
 }
 
+// checkout
 async function goToCheckout(){
-
   if(qty > 0 && !correct){
     alert("Answer main question");
     return;
   }
-
   if(dropQty > 0 && !dropCorrect){
     alert("Answer drop question");
-    return;
-  }
-
-  if(qty === 0 && dropQty === 0){
-    alert("Select something first");
     return;
   }
 
@@ -337,6 +342,10 @@ async function goToCheckout(){
   }
 }
 
+// 🔥 FORCE HIDE (ABSOLUTE)
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById("dropQ").style.display = "none";
+});
 </script>
 
 </body>
