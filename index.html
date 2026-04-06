@@ -13,7 +13,7 @@ body {
   color:white;
 }
 
-.container { max-width:500px; margin:auto; padding:20px; }
+.container { max-width:520px; margin:auto; padding:20px; }
 .center { text-align:center; }
 
 .logo {
@@ -26,28 +26,34 @@ body {
   color:#d4af37;
 }
 
+h1 {
+  font-size:34px;
+  margin:10px 0;
+}
+
 .card {
   background:#0f1c35;
-  padding:20px;
-  border-radius:16px;
-  margin-top:25px;
+  padding:22px;
+  border-radius:18px;
+  margin-top:30px;
 }
 
 .block {
   background:#0a1630;
-  padding:14px;
+  padding:16px;
   border-radius:12px;
-  margin-top:14px;
+  margin-top:16px;
 }
 
 .btn {
   width:100%;
-  padding:16px;
+  padding:18px;
   border:none;
   border-radius:12px;
-  margin-top:16px;
-  font-size:16px;
+  margin-top:20px;
+  font-size:18px;
   cursor:pointer;
+  font-weight:bold;
 }
 
 .primary { background:#d4af37; color:black; }
@@ -55,7 +61,7 @@ body {
 .dark { background:#1c2a4a; color:white; }
 
 .option {
-  padding:14px;
+  padding:16px;
   border:1px solid #1c2a4a;
   border-radius:10px;
   margin-top:10px;
@@ -73,23 +79,42 @@ body {
 }
 
 .qty button {
-  width:40px;
-  height:40px;
+  width:48px;
+  height:48px;
   border:none;
   border-radius:10px;
   background:#1c2a4a;
   color:white;
+  font-size:20px;
+}
+
+.odds {
+  color:#d4af37;
+  font-weight:bold;
   font-size:18px;
 }
 
-.odds { color:#d4af37; font-weight:bold; }
-.small { opacity:0.7; font-size:13px; margin-top:8px; }
-.section-title { margin-top:50px; font-size:22px; }
+.total {
+  font-size:26px;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.small {
+  opacity:0.85;
+  font-size:14px;
+  margin-top:8px;
+}
+
+.section-title {
+  margin-top:50px;
+  font-size:24px;
+}
 
 .popup {
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.7);
+  background:rgba(0,0,0,0.75);
   display:none;
   align-items:center;
   justify-content:center;
@@ -98,11 +123,10 @@ body {
 
 .popup-box {
   background:#0f1c35;
-  padding:20px;
-  border-radius:16px;
-  max-width:400px;
+  padding:22px;
+  border-radius:18px;
+  max-width:420px;
   width:100%;
-  position:relative;
 }
 
 .close {
@@ -120,14 +144,23 @@ body {
 
 <div class="center">
   <div class="logo">S</div>
-  <h2>SELECTED CLUB</h2>
-  <h1>£1000 Selected Draw</h1>
-  <div class="small">250 entries • £6 per entry</div>
-  <div class="small">Only 250 total entries</div>
+
+  <!-- 🔥 1. STRONG HERO -->
+  <h1>WIN £1,000 TODAY</h1>
+
+  <div class="small">Only 250 entries • One winner • Skill-based</div>
+  <div class="small">Secure checkout • UK compliant 🔒</div>
+
+  <!-- 🔥 2. URGENCY -->
+  <div class="odds">187 / 250 entries remaining</div>
 </div>
 
 <!-- MAIN DRAW -->
 <div class="card">
+
+<div class="small">
+Enter the main draw below for your chance to win £1000.
+</div>
 
 <div class="block">
 Choose entries
@@ -140,7 +173,9 @@ Choose entries
 
 <div class="block">
 <div id="odds" class="odds">No entries selected</div>
-<div id="total" class="odds">Total: £0</div>
+
+<!-- 🔥 3. TOTAL SPEND -->
+<div id="total" class="total">£0</div>
 </div>
 
 <div class="block" id="mainQ" style="display:none;">
@@ -151,7 +186,8 @@ Choose entries
 <div class="option" onclick="selectAnswer(this,false)">M</div>
 </div>
 
-<button class="btn primary" onclick="startCheckout()">Continue</button>
+<!-- 🔥 4. CTA -->
+<button class="btn primary" onclick="startCheckout()">ENTER NOW</button>
 
 </div>
 
@@ -159,6 +195,10 @@ Choose entries
 <div class="section-title">Selected Drops</div>
 
 <div class="card">
+
+<div class="small">
+Instant win draws. Every 80–120 entries produces a winner.
+</div>
 
 <div class="block">
 Choose entries
@@ -181,21 +221,19 @@ Choose entries
 
 </div>
 
-<!-- TERMS -->
-<div class="section-title">Terms & Conditions</div>
+<!-- 🔥 7. WHY PLAY -->
 <div class="card small">
-Max 5 entries per person.<br><br>
-250 entries per main draw.<br><br>
-£6 per entry.<br><br>
-Selected Drops are separate draws (£3 per entry).<br><br>
-Each drop runs 80–120 entries.<br><br>
-Winners selected at random.<br><br>
-Skill question required.<br><br>
-Typical drop payout £160–£240.
+Why play?<br><br>
+• Low entry cost<br>
+• High reward potential<br>
+• Instant drop wins<br>
+• Fair and transparent draws
 </div>
 
+<!-- 🔥 6. TRUST -->
 <div class="small" style="text-align:center; margin-top:20px;">
-Secure checkout powered by Stripe 🔒
+Secure payments powered by Stripe 🔒<br>
+Winners selected fairly and at random
 </div>
 
 </div>
@@ -206,14 +244,15 @@ Secure checkout powered by Stripe 🔒
 
 <div class="close" onclick="closePopup()">✕</div>
 
-<h3>Review your order</h3>
+<!-- 🔥 5. SALES POPUP -->
+<h3>Boost your chances 🚀</h3>
 
 <p class="small">
-You're entering the £1000 main draw 🎯<br><br>
+You're entering the £1000 main draw.<br><br>
 
-Want to boost your chances?<br><br>
+Want to increase your chances instantly?<br><br>
 
-Selected Drops produce winners instantly every 80–120 entries.<br>
+Selected Drops produce winners every 80–120 entries.<br>
 Typical payout £160–£240 💸<br><br>
 
 Add entries below before checkout 👇
@@ -227,9 +266,9 @@ Add entries below before checkout 👇
 <div class="option" onclick="selectPopupDrop(this,false)">9</div>
 </div>
 
-<button class="btn green" onclick="addDrop(1)">Add 1 Entry (£3)</button>
-<button class="btn green" onclick="addDrop(3)">Add 3 Entries (£9) – Best Value</button>
-<button class="btn dark" onclick="goToCheckout()">No thanks</button>
+<button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
+<button class="btn green" onclick="addDrop(3)">Add 3 (£9) – Best Value</button>
+<button class="btn dark" onclick="goToCheckout()">Continue without</button>
 
 </div>
 </div>
@@ -243,7 +282,7 @@ let popupCorrect = false;
 
 function updateTotal(){
   document.getElementById("total").innerText =
-  "Total: £" + (qty*6 + dropQty*3);
+  "£" + (qty*6 + dropQty*3);
 }
 
 function change(v){
