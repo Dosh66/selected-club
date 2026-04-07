@@ -26,6 +26,28 @@ body {
   color:#d4af37;
 }
 
+h1 { font-size:28px; margin:10px 0; }
+
+.urgent {
+  color:#ff4d4d;
+  font-weight:bold;
+  font-size:18px;
+  margin-top:10px;
+}
+
+.countdown {
+  font-size:26px;
+  font-weight:bold;
+  margin-top:8px;
+  color:#d4af37;
+}
+
+.highlight {
+  font-size:16px;
+  margin-top:6px;
+  opacity:0.85;
+}
+
 .card {
   background:#0f1c35;
   padding:20px;
@@ -68,23 +90,7 @@ body {
   font-size:18px;
 }
 
-.odds {
-  color:#d4af37;
-  font-weight:bold;
-  margin-top:10px;
-}
-
-.price {
-  font-size:22px;
-  font-weight:bold;
-  margin-top:10px;
-}
-
-.small {
-  opacity:0.7;
-  font-size:13px;
-  margin-top:8px;
-}
+.price { font-size:18px; margin-top:6px; }
 
 .btn {
   width:100%;
@@ -97,9 +103,33 @@ body {
 }
 
 .primary { background:#d4af37; color:black; }
-.green { background:#2ecc71; color:white; }
+.green { background:#2ecc71; }
 
 .hidden { display:none; }
+
+/* POPUP */
+.popup {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.popup-box {
+  background:#0f1c35;
+  padding:20px;
+  border-radius:16px;
+  width:100%;
+  max-width:400px;
+}
+
+.close {
+  float:right;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -109,13 +139,16 @@ body {
 
 <div class="center">
   <div class="logo">S</div>
-  <h2>SELECTED CLUB</h2>
+
   <h1>ENTER THIS WEEK’S £1000 DRAW</h1>
-  <div class="small">250 entries • £6 per entry</div>
-  <div id="countdown" class="odds"></div>
+
+  <div class="urgent">🔥 ONLY 250 ENTRIES AVAILABLE</div>
+  <div class="highlight">LOW ODDS • HIGH WIN CHANCE</div>
+
+  <div id="countdown" class="countdown"></div>
 </div>
 
-<!-- MAIN DRAW -->
+<!-- MAIN -->
 <div class="card">
 
 <div class="block">
@@ -128,11 +161,11 @@ Choose entries
 </div>
 
 <div class="block">
-<div id="odds" class="odds">No entries selected</div>
+<div id="odds">No entries selected</div>
 
 <div class="price">Main draw: <span id="mainTotal">£0</span></div>
-<div class="price">Selected drops: <span id="dropTotalDisplay">£0</span></div>
-<div class="price">Total: <span id="grandTotal">£0</span></div>
+<div class="price">Selected drops: <span id="dropTotal">£0</span></div>
+<div class="price"><b>Total: <span id="grandTotal">£0</span></b></div>
 </div>
 
 <div id="mainQ" class="block hidden">
@@ -140,17 +173,25 @@ Skill question
 <div class="option" onclick="selectAnswer(this,false)">Z</div>
 <div class="option" onclick="selectAnswer(this,true)">A</div>
 <div class="option" onclick="selectAnswer(this,false)">M</div>
-<div class="small">Which comes first in the alphabet?</div>
+<div class="highlight">Which comes first in the alphabet?</div>
 </div>
 
 <button class="btn primary" onclick="startCheckout()">ENTER NOW</button>
 
 </div>
 
+<!-- WHY PLAY -->
+<div class="card">
+<b>Why play?</b>
+<div class="highlight">• Only 250 entries = strong odds</div>
+<div class="highlight">• Weekly £1000 winner</div>
+<div class="highlight">• Instant drop wins available</div>
+</div>
+
 <!-- DROPS -->
 <div class="card">
 
-<div class="small">
+<div class="highlight">
 Instant win draws. Every 80–120 entries produces a winner.
 </div>
 
@@ -168,150 +209,166 @@ Skill question
 <div class="option" onclick="selectDrop(this,false)">7</div>
 <div class="option" onclick="selectDrop(this,true)">5</div>
 <div class="option" onclick="selectDrop(this,false)">9</div>
-<div class="small">What is 2 + 3?</div>
+<div class="highlight">What is 2 + 3?</div>
 </div>
 
 <button class="btn green" onclick="goToCheckout()">Enter Drop</button>
 
 </div>
 
+<!-- TERMS -->
+<div class="card">
+<b>Terms & Conditions</b>
+<div class="highlight">Max 5 entries per person</div>
+<div class="highlight">250 entries per draw</div>
+<div class="highlight">£6 per entry</div>
+<div class="highlight">Drops £3 per entry</div>
+<div class="highlight">Winners selected randomly</div>
+</div>
+
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="popup">
+<div class="popup-box">
+
+<div class="close" onclick="closePopup()">✕</div>
+
+<h3>Review your order</h3>
+
+<div id="summary"></div>
+
+<div class="highlight" style="margin-top:10px;">
+Would you like to add Selected Drop entries?
+</div>
+
+<div class="block">
+Skill question
+<div class="option" onclick="selectPopup(this,false)">7</div>
+<div class="option" onclick="selectPopup(this,true)">5</div>
+<div class="option" onclick="selectPopup(this,false)">9</div>
+</div>
+
+<button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
+<button class="btn green" onclick="addDrop(3)">Add 3 (£9)</button>
+<button class="btn" onclick="goToCheckout()">Skip</button>
+
+</div>
 </div>
 
 <script>
-let qty = 0;
-let dropQty = 0;
-let correct = false;
-let dropCorrect = false;
+let qty=0, dropQty=0, correct=false, dropCorrect=false, popupCorrect=false;
 
-// UPDATE TOTALS
 function updateTotals(){
-  let mainTotal = qty * 6;
-  let dropTotal = dropQty * 3;
-  let grandTotal = mainTotal + dropTotal;
+  let main=qty*6;
+  let drop=dropQty*3;
+  let total=main+drop;
 
-  document.getElementById("mainTotal").innerText = "£" + mainTotal;
-  document.getElementById("dropTotalDisplay").innerText = "£" + dropTotal;
-  document.getElementById("grandTotal").innerText = "£" + grandTotal;
+  document.getElementById("mainTotal").innerText="£"+main;
+  document.getElementById("dropTotal").innerText="£"+drop;
+  document.getElementById("grandTotal").innerText="£"+total;
 }
 
-// MAIN
 function change(v){
-  qty += v;
-  if(qty < 0) qty = 0;
-  if(qty > 5) qty = 5;
+  qty+=v;
+  if(qty<0) qty=0;
+  if(qty>5) qty=5;
 
-  document.getElementById("qty").innerText = qty;
+  document.getElementById("qty").innerText=qty;
 
-  if(qty > 0){
-    document.getElementById("odds").innerText =
-      qty + " entry → 1 in " + Math.floor(250/qty);
+  if(qty>0){
+    document.getElementById("odds").innerText=qty+" entry → 1 in "+Math.floor(250/qty);
     document.getElementById("mainQ").classList.remove("hidden");
   } else {
-    document.getElementById("odds").innerText = "No entries selected";
     document.getElementById("mainQ").classList.add("hidden");
-    correct = false;
+    document.getElementById("odds").innerText="No entries selected";
   }
 
   updateTotals();
 }
 
-// DROPS
 function changeDrop(v){
-  dropQty += v;
-  if(dropQty < 0) dropQty = 0;
+  dropQty+=v;
+  if(dropQty<0) dropQty=0;
 
-  document.getElementById("dropQty").innerText = dropQty;
+  document.getElementById("dropQty").innerText=dropQty;
 
-  if(dropQty > 0){
+  if(dropQty>0){
     document.getElementById("dropQ").classList.remove("hidden");
   } else {
     document.getElementById("dropQ").classList.add("hidden");
-    dropCorrect = false;
   }
 
   updateTotals();
 }
 
-// ANSWERS
-function selectAnswer(el,isCorrect){
-  document.querySelectorAll("#mainQ .option").forEach(o=>o.classList.remove("correct","wrong"));
-  if(isCorrect){el.classList.add("correct");correct=true;}
-  else{el.classList.add("wrong");correct=false;}
+function selectAnswer(el,c){
+  document.querySelectorAll("#mainQ .option").forEach(o=>o.classList.remove("correct"));
+  if(c){el.classList.add("correct");correct=true;}
 }
 
-function selectDrop(el,isCorrect){
-  document.querySelectorAll("#dropQ .option").forEach(o=>o.classList.remove("correct","wrong"));
-  if(isCorrect){el.classList.add("correct");dropCorrect=true;}
-  else{el.classList.add("wrong");dropCorrect=false;}
+function selectDrop(el,c){
+  document.querySelectorAll("#dropQ .option").forEach(o=>o.classList.remove("correct"));
+  if(c){el.classList.add("correct");dropCorrect=true;}
 }
 
-// CHECKOUT
+function selectPopup(el,c){
+  document.querySelectorAll("#popup .option").forEach(o=>o.classList.remove("correct"));
+  if(c){el.classList.add("correct");popupCorrect=true;}
+}
+
 function startCheckout(){
-  if(qty === 0){
-    alert("Select entries first");
-    return;
-  }
-  if(!correct){
-    alert("Answer the skill question");
-    return;
-  }
+  if(qty===0) return alert("Select entries first");
+  if(!correct) return alert("Answer question");
+
+  document.getElementById("summary").innerText=
+    "You selected "+qty+" ticket(s) for the main draw.";
+
+  document.getElementById("popup").style.display="flex";
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+function addDrop(n){
+  if(!popupCorrect) return alert("Answer drop question");
+  dropQty+=n;
   goToCheckout();
 }
 
 async function goToCheckout(){
-  if(qty > 0 && !correct){
-    alert("Answer main question");
-    return;
-  }
-  if(dropQty > 0 && !dropCorrect){
-    alert("Answer drop question");
-    return;
-  }
+  if(qty>0 && !correct) return alert("Answer main question");
+  if(dropQty>0 && !dropCorrect && !popupCorrect) return alert("Answer drop question");
 
-  const res = await fetch("/.netlify/functions/create-checkout",{
+  const res=await fetch("/.netlify/functions/create-checkout",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body: JSON.stringify({mainQty:qty, dropQty:dropQty})
   });
 
-  const data = await res.json();
-
-  if(data.url){
-    window.location.href = data.url;
-  } else {
-    alert("Checkout error");
-  }
+  const data=await res.json();
+  if(data.url) window.location.href=data.url;
 }
 
 // COUNTDOWN
 function getNextSunday5pm(){
-  const now = new Date();
-  const result = new Date(now);
-
-  result.setDate(now.getDate() + (7 - now.getDay()) % 7);
-  result.setHours(17,0,0,0);
-
-  if(now > result){
-    result.setDate(result.getDate() + 7);
-  }
-
-  return result;
+  const now=new Date();
+  const d=new Date(now);
+  d.setDate(now.getDate()+(7-now.getDay())%7);
+  d.setHours(17,0,0,0);
+  if(now>d) d.setDate(d.getDate()+7);
+  return d;
 }
 
 function updateCountdown(){
-  const now = new Date();
-  const target = getNextSunday5pm();
-  const diff = target - now;
-
-  const days = Math.floor(diff / (1000*60*60*24));
-  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-  const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
-
-  document.getElementById("countdown").innerText =
-    "Draw ends in " + days + "d " + hours + "h " + mins + "m";
+  const diff=getNextSunday5pm()-new Date();
+  const h=Math.floor(diff/1000/60/60);
+  const m=Math.floor((diff/1000/60)%60);
+  document.getElementById("countdown").innerText="Ends in "+h+"h "+m+"m";
 }
 
-setInterval(updateCountdown, 1000);
+setInterval(updateCountdown,1000);
 updateCountdown();
 </script>
 
