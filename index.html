@@ -1,376 +1,802 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Selected Club</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Selected Club</title>
 
-<style>
-body {
-  margin:0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(180deg,#08142b,#020617);
-  color:white;
-}
+  <style>
+    :root {
+      --bg-top: #08142b;
+      --bg-bottom: #020617;
+      --card: #0f1c35;
+      --block: #0a1630;
+      --line: #1c2a4a;
+      --gold: #d4af37;
+      --green: #2ecc71;
+      --red: #ff5a5a;
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.78);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
 
-.container { max-width:500px; margin:auto; padding:20px; }
-.center { text-align:center; }
+    * {
+      box-sizing: border-box;
+    }
 
-.logo {
-  width:80px; height:80px;
-  border:2px solid #d4af37;
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  margin:20px auto;
-  font-size:28px;
-  color:#d4af37;
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+      color: var(--text);
+    }
 
-h1 { font-size:28px; margin:10px 0; }
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 20px 18px 40px;
+    }
 
-.urgent {
-  color:#ff4d4d;
-  font-weight:bold;
-  font-size:18px;
-  margin-top:10px;
-}
+    .center {
+      text-align: center;
+    }
 
-.countdown {
-  font-size:26px;
-  font-weight:bold;
-  margin-top:8px;
-  color:#d4af37;
-}
+    .logo {
+      width: 84px;
+      height: 84px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 22px auto 18px;
+      font-size: 30px;
+      font-weight: bold;
+      color: var(--gold);
+      background: rgba(212, 175, 55, 0.04);
+      box-shadow: var(--shadow);
+    }
 
-.highlight {
-  font-size:16px;
-  margin-top:6px;
-  opacity:0.85;
-}
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      background: rgba(212, 175, 55, 0.08);
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
 
-.card {
-  background:#0f1c35;
-  padding:20px;
-  border-radius:16px;
-  margin-top:20px;
-}
+    h1 {
+      font-size: 32px;
+      line-height: 1.15;
+      margin: 0 0 10px;
+      letter-spacing: 0.3px;
+    }
 
-.block {
-  background:#0a1630;
-  padding:14px;
-  border-radius:12px;
-  margin-top:14px;
-}
+    .subhead {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 8px;
+    }
 
-.option {
-  padding:14px;
-  border:1px solid #1c2a4a;
-  border-radius:10px;
-  margin-top:10px;
-  text-align:center;
-  cursor:pointer;
-}
+    .urgent {
+      color: var(--red);
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 14px;
+      letter-spacing: 0.2px;
+    }
 
-.correct { border:1px solid #2ecc71; background:rgba(46,204,113,0.15); }
-.wrong { border:1px solid #e74c3c; background:rgba(231,76,60,0.15); }
+    .low-odds {
+      color: var(--gold);
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
 
-.qty {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+    .countdown-wrap {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      box-shadow: var(--shadow);
+    }
 
-.qty button {
-  width:40px;
-  height:40px;
-  border:none;
-  border-radius:10px;
-  background:#1c2a4a;
-  color:white;
-  font-size:18px;
-}
+    .countdown-label {
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      margin-bottom: 8px;
+    }
 
-.price { font-size:18px; margin-top:6px; }
+    .countdown {
+      font-size: 32px;
+      line-height: 1.1;
+      font-weight: bold;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
 
-.btn {
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:12px;
-  margin-top:16px;
-  font-size:16px;
-  cursor:pointer;
-}
+    .countdown-foot {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
 
-.primary { background:#d4af37; color:black; }
-.green { background:#2ecc71; }
+    .card {
+      background: var(--card);
+      padding: 22px;
+      border-radius: 18px;
+      margin-top: 26px;
+      box-shadow: var(--shadow);
+    }
 
-.hidden { display:none; }
+    .section-title {
+      margin-top: 42px;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 0.2px;
+    }
 
-/* POPUP */
-.popup {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
+    .section-intro {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
 
-.popup-box {
-  background:#0f1c35;
-  padding:20px;
-  border-radius:16px;
-  width:100%;
-  max-width:400px;
-}
+    .block {
+      background: var(--block);
+      padding: 16px;
+      border-radius: 14px;
+      margin-top: 16px;
+    }
 
-.close {
-  float:right;
-  cursor:pointer;
-}
-</style>
+    .block-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .block-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 6px;
+    }
+
+    .qty {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .qty button {
+      width: 46px;
+      height: 46px;
+      border: none;
+      border-radius: 12px;
+      background: var(--line);
+      color: var(--text);
+      font-size: 22px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .qty button:active {
+      transform: scale(0.98);
+    }
+
+    .qty-value {
+      flex: 1;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .odds {
+      color: var(--gold);
+      font-weight: bold;
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      font-size: 16px;
+      margin-top: 10px;
+      color: var(--muted);
+    }
+
+    .price-row strong {
+      color: var(--text);
+      font-size: 18px;
+    }
+
+    .price-total {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 14px;
+      padding-top: 14px;
+    }
+
+    .price-total strong {
+      color: var(--gold);
+      font-size: 24px;
+    }
+
+    .option {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      margin-top: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s ease;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .option:hover {
+      border-color: rgba(212, 175, 55, 0.5);
+    }
+
+    .correct {
+      border: 1px solid var(--green);
+      background: rgba(46, 204, 113, 0.16);
+    }
+
+    .wrong {
+      border: 1px solid #e74c3c;
+      background: rgba(231, 76, 60, 0.16);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 17px;
+      border: none;
+      border-radius: 14px;
+      margin-top: 18px;
+      font-size: 17px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      opacity: 0.96;
+    }
+
+    .btn:active {
+      transform: scale(0.995);
+    }
+
+    .primary {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .green {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .dark {
+      background: var(--line);
+      color: #fff;
+    }
+
+    .small {
+      opacity: 0.82;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-top: 8px;
+    }
+
+    .trust-line {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Popup */
+    .popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .popup-box {
+      background: var(--card);
+      padding: 22px;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 430px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      right: 16px;
+      top: 14px;
+      cursor: pointer;
+      font-size: 22px;
+      opacity: 0.75;
+    }
+
+    .popup h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .popup-highlight {
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 14px 0;
+    }
+
+    .winner-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .winner-item {
+      background: var(--block);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .winner-item strong {
+      color: var(--text);
+    }
+
+    .bullet-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      text-align: left;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .bullet-list li {
+      margin-bottom: 4px;
+    }
+
+    .mini-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(46, 204, 113, 0.12);
+      border: 1px solid rgba(46, 204, 113, 0.28);
+      color: #bff4d1;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 0.2px;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="container">
 
-<div class="container">
+    <!-- Hero -->
+    <div class="center">
+      <div class="logo">S</div>
 
-<div class="center">
-  <div class="logo">S</div>
+      <div class="eyebrow">SELECTED CLUB</div>
 
-  <h1>ENTER THIS WEEK’S £1000 DRAW</h1>
+      <h1>ENTER THIS WEEK’S £1000 DRAW</h1>
 
-  <div class="urgent">🔥 ONLY 250 ENTRIES AVAILABLE</div>
-  <div class="highlight">LOW ODDS • HIGH WIN CHANCE</div>
+      <div class="subhead">
+        One winner every week. Skill-based entry. Secure checkout.
+      </div>
 
-  <div id="countdown" class="countdown"></div>
-</div>
+      <div class="urgent">🔥 ONLY 250 ENTRIES AVAILABLE</div>
+      <div class="low-odds">LOW ODDS • HIGH WIN CHANCE</div>
 
-<!-- MAIN -->
-<div class="card">
+      <div class="countdown-wrap">
+        <div class="countdown-label">Draw ends in</div>
+        <div id="countdown" class="countdown">0d / 0h / 0m</div>
+        <div class="countdown-foot">Closes Sunday at 5:00pm</div>
+      </div>
+    </div>
 
-<div class="block">
-Choose entries
-<div class="qty">
-<button onclick="change(-1)">-</button>
-<div id="qty">0</div>
-<button onclick="change(1)">+</button>
-</div>
-</div>
+    <!-- Main draw -->
+    <div class="card">
+      <div class="block-title">Main Draw</div>
+      <div class="block-subtitle">
+        Enter below for your chance to win £1000 in this week’s draw.
+      </div>
 
-<div class="block">
-<div id="odds">No entries selected</div>
+      <div class="block">
+        <div class="block-title">Choose entries</div>
+        <div class="qty">
+          <button onclick="changeMain(-1)">-</button>
+          <div id="qty" class="qty-value">0</div>
+          <button onclick="changeMain(1)">+</button>
+        </div>
+        <div class="small">Max 5 entries per person</div>
+      </div>
 
-<div class="price">Main draw: <span id="mainTotal">£0</span></div>
-<div class="price">Selected drops: <span id="dropTotal">£0</span></div>
-<div class="price"><b>Total: <span id="grandTotal">£0</span></b></div>
-</div>
+      <div class="block">
+        <div id="odds" class="odds">No entries selected</div>
 
-<div id="mainQ" class="block hidden">
-Skill question
-<div class="option" onclick="selectAnswer(this,false)">Z</div>
-<div class="option" onclick="selectAnswer(this,true)">A</div>
-<div class="option" onclick="selectAnswer(this,false)">M</div>
-<div class="highlight">Which comes first in the alphabet?</div>
-</div>
+        <div class="price-row">
+          <span>Main draw</span>
+          <strong id="mainTotal">£0</strong>
+        </div>
 
-<button class="btn primary" onclick="startCheckout()">ENTER NOW</button>
+        <div class="price-row">
+          <span>Selected drops</span>
+          <strong id="dropTotal">£0</strong>
+        </div>
 
-</div>
+        <div class="price-row price-total">
+          <span>Total price</span>
+          <strong id="grandTotal">£0</strong>
+        </div>
+      </div>
 
-<!-- WHY PLAY -->
-<div class="card">
-<b>Why play?</b>
-<div class="highlight">• Only 250 entries = strong odds</div>
-<div class="highlight">• Weekly £1000 winner</div>
-<div class="highlight">• Instant drop wins available</div>
-</div>
+      <div id="mainQ" class="block hidden">
+        <div class="block-title">Skill question</div>
+        <div class="block-subtitle">Which comes first in the alphabet?</div>
 
-<!-- DROPS -->
-<div class="card">
+        <div class="option" onclick="selectMainAnswer(this,false)">Z</div>
+        <div class="option" onclick="selectMainAnswer(this,true)">A</div>
+        <div class="option" onclick="selectMainAnswer(this,false)">M</div>
+      </div>
 
-<div class="highlight">
-Instant win draws. Every 80–120 entries produces a winner.
-</div>
+      <button class="btn primary" onclick="startCheckout()">ENTER NOW</button>
+    </div>
 
-<div class="block">
-Choose entries
-<div class="qty">
-<button onclick="changeDrop(-1)">-</button>
-<div id="dropQty">0</div>
-<button onclick="changeDrop(1)">+</button>
-</div>
-</div>
+    <!-- Why play -->
+    <div class="section-title">Why play?</div>
+    <div class="card">
+      <ul class="bullet-list">
+        <li>Only 250 total entries means stronger odds.</li>
+        <li>Weekly £1000 prize gives every draw real value.</li>
+        <li>Selected Drops give you extra chances to win instantly.</li>
+        <li>Simple, fair and easy to enter.</li>
+      </ul>
+    </div>
 
-<div id="dropQ" class="block hidden">
-Skill question
-<div class="option" onclick="selectDrop(this,false)">7</div>
-<div class="option" onclick="selectDrop(this,true)">5</div>
-<div class="option" onclick="selectDrop(this,false)">9</div>
-<div class="highlight">What is 2 + 3?</div>
-</div>
+    <!-- Selected drops -->
+    <div class="section-title">Selected Drops</div>
+    <div class="section-intro">
+      Instant-win style entries. Every 80–120 entries produces a winner.
+    </div>
 
-<button class="btn green" onclick="goToCheckout()">Enter Drop</button>
+    <div class="card">
+      <div class="mini-badge">Typical payout £160–£240</div>
 
-</div>
+      <div class="block">
+        <div class="block-title">Choose entries</div>
+        <div class="qty">
+          <button onclick="changeDrop(-1)">-</button>
+          <div id="dropQty" class="qty-value">0</div>
+          <button onclick="changeDrop(1)">+</button>
+        </div>
+      </div>
 
-<!-- TERMS -->
-<div class="card">
-<b>Terms & Conditions</b>
-<div class="highlight">Max 5 entries per person</div>
-<div class="highlight">250 entries per draw</div>
-<div class="highlight">£6 per entry</div>
-<div class="highlight">Drops £3 per entry</div>
-<div class="highlight">Winners selected randomly</div>
-</div>
+      <div id="dropQ" class="block hidden">
+        <div class="block-title">Skill question</div>
+        <div class="block-subtitle">What is 2 + 3?</div>
 
-</div>
+        <div class="option" onclick="selectDropAnswer(this,false)">7</div>
+        <div class="option" onclick="selectDropAnswer(this,true)">5</div>
+        <div class="option" onclick="selectDropAnswer(this,false)">9</div>
+      </div>
 
-<!-- POPUP -->
-<div id="popup" class="popup">
-<div class="popup-box">
+      <button class="btn green" onclick="checkoutDirect()">Enter Drop</button>
+    </div>
 
-<div class="close" onclick="closePopup()">✕</div>
+    <!-- Recent winners -->
+    <div class="section-title">Recent winners</div>
+    <div class="card">
+      <div class="winner-list">
+        <div class="winner-item"><strong>James</strong> — £180 Selected Drop</div>
+        <div class="winner-item"><strong>Sophie</strong> — £220 Selected Drop</div>
+        <div class="winner-item"><strong>Aaron</strong> — £1000 Weekly Draw</div>
+      </div>
+    </div>
 
-<h3>Review your order</h3>
+    <!-- Terms -->
+    <div class="section-title">Terms & Conditions</div>
+    <div class="card">
+      <ul class="bullet-list">
+        <li>Maximum 5 main draw entries per person.</li>
+        <li>250 total entries per weekly main draw.</li>
+        <li>Main draw entries cost £6 each.</li>
+        <li>Selected Drop entries cost £3 each.</li>
+        <li>Selected Drops run independently from the weekly draw.</li>
+        <li>Skill question must be answered correctly to enter.</li>
+        <li>Winners are selected fairly and at random.</li>
+      </ul>
+    </div>
 
-<div id="summary"></div>
+    <div class="trust-line">
+      Secure payments powered by Stripe 🔒<br />
+      Winners selected fairly and at random
+    </div>
+  </div>
 
-<div class="highlight" style="margin-top:10px;">
-Would you like to add Selected Drop entries?
-</div>
+  <!-- Popup -->
+  <div id="popup" class="popup">
+    <div class="popup-box">
+      <div class="close" onclick="closePopup()">✕</div>
 
-<div class="block">
-Skill question
-<div class="option" onclick="selectPopup(this,false)">7</div>
-<div class="option" onclick="selectPopup(this,true)">5</div>
-<div class="option" onclick="selectPopup(this,false)">9</div>
-</div>
+      <h3>⚡ Almost done...</h3>
 
-<button class="btn green" onclick="addDrop(1)">Add 1 (£3)</button>
-<button class="btn green" onclick="addDrop(3)">Add 3 (£9)</button>
-<button class="btn" onclick="goToCheckout()">Skip</button>
+      <div class="small">
+        You’ve entered the <span class="popup-highlight">£1000 weekly draw</span> 🎯
+      </div>
 
-</div>
-</div>
+      <div class="divider"></div>
 
-<script>
-let qty=0, dropQty=0, correct=false, dropCorrect=false, popupCorrect=false;
+      <div class="small">
+        Before you checkout — don’t miss this 👇
+      </div>
 
-function updateTotals(){
-  let main=qty*6;
-  let drop=dropQty*3;
-  let total=main+drop;
+      <div class="small">
+        <span class="popup-highlight">Selected Drops</span> produce winners every
+        <strong>80–120 entries</strong>.<br />
+        Typical payout: <strong>£160–£240</strong>.
+      </div>
 
-  document.getElementById("mainTotal").innerText="£"+main;
-  document.getElementById("dropTotal").innerText="£"+drop;
-  document.getElementById("grandTotal").innerText="£"+total;
-}
+      <div class="small">
+        <strong>Most players add entries here to boost their chances.</strong>
+      </div>
 
-function change(v){
-  qty+=v;
-  if(qty<0) qty=0;
-  if(qty>5) qty=5;
+      <div class="block">
+        <div class="block-title">Skill question</div>
+        <div class="block-subtitle">What is 2 + 3?</div>
 
-  document.getElementById("qty").innerText=qty;
+        <div class="option" onclick="selectPopupAnswer(this,false)">7</div>
+        <div class="option"
+                  <div class="option" onclick="selectPopupAnswer(this,true)">5</div>
+        <div class="option" onclick="selectPopupAnswer(this,false)">9</div>
+      </div>
 
-  if(qty>0){
-    document.getElementById("odds").innerText=qty+" entry → 1 in "+Math.floor(250/qty);
-    document.getElementById("mainQ").classList.remove("hidden");
-  } else {
-    document.getElementById("mainQ").classList.add("hidden");
-    document.getElementById("odds").innerText="No entries selected";
-  }
+      <button class="btn green" onclick="addDropAndCheckout(1)">
+        Add 1 Entry (£3)
+      </button>
 
-  updateTotals();
-}
+      <button class="btn green" onclick="addDropAndCheckout(3)">
+        Add 3 Entries (£9) – Most Popular
+      </button>
 
-function changeDrop(v){
-  dropQty+=v;
-  if(dropQty<0) dropQty=0;
+      <button class="btn dark" onclick="checkoutMainOnly()">
+        Skip for now
+      </button>
 
-  document.getElementById("dropQty").innerText=dropQty;
+    </div>
+  </div>
 
-  if(dropQty>0){
-    document.getElementById("dropQ").classList.remove("hidden");
-  } else {
-    document.getElementById("dropQ").classList.add("hidden");
-  }
+  <script>
+    let mainQty = 0;
+    let dropQty = 0;
 
-  updateTotals();
-}
+    let mainCorrect = false;
+    let dropCorrect = false;
+    let popupCorrect = false;
 
-function selectAnswer(el,c){
-  document.querySelectorAll("#mainQ .option").forEach(o=>o.classList.remove("correct"));
-  if(c){el.classList.add("correct");correct=true;}
-}
+    // COUNTDOWN
+    function getNextSunday5pm() {
+      const now = new Date();
+      const target = new Date(now);
 
-function selectDrop(el,c){
-  document.querySelectorAll("#dropQ .option").forEach(o=>o.classList.remove("correct"));
-  if(c){el.classList.add("correct");dropCorrect=true;}
-}
+      const day = now.getDay();
+      const daysUntilSunday = (7 - day) % 7;
 
-function selectPopup(el,c){
-  document.querySelectorAll("#popup .option").forEach(o=>o.classList.remove("correct"));
-  if(c){el.classList.add("correct");popupCorrect=true;}
-}
+      target.setDate(now.getDate() + daysUntilSunday);
+      target.setHours(17, 0, 0, 0);
 
-function startCheckout(){
-  if(qty===0) return alert("Select entries first");
-  if(!correct) return alert("Answer question");
+      if (now > target) {
+        target.setDate(target.getDate() + 7);
+      }
 
-  document.getElementById("summary").innerText=
-    "You selected "+qty+" ticket(s) for the main draw.";
+      return target;
+    }
 
-  document.getElementById("popup").style.display="flex";
-}
+    function updateCountdown() {
+      const now = new Date();
+      const target = getNextSunday5pm();
+      const diff = target - now;
 
-function closePopup(){
-  document.getElementById("popup").style.display="none";
-}
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-function addDrop(n){
-  if(!popupCorrect) return alert("Answer drop question");
-  dropQty+=n;
-  goToCheckout();
-}
+      document.getElementById("countdown").innerText =
+        days + "d / " + hours + "h / " + mins + "m";
+    }
 
-async function goToCheckout(){
-  if(qty>0 && !correct) return alert("Answer main question");
-  if(dropQty>0 && !dropCorrect && !popupCorrect) return alert("Answer drop question");
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
 
-  const res=await fetch("/.netlify/functions/create-checkout",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({mainQty:qty, dropQty:dropQty})
-  });
+    // TOTALS
+    function updateTotals() {
+      const mainTotal = mainQty * 6;
+      const dropTotal = dropQty * 3;
+      const total = mainTotal + dropTotal;
 
-  const data=await res.json();
-  if(data.url) window.location.href=data.url;
-}
+      document.getElementById("mainTotal").innerText = "£" + mainTotal;
+      document.getElementById("dropTotal").innerText = "£" + dropTotal;
+      document.getElementById("grandTotal").innerText = "£" + total;
+    }
 
-// COUNTDOWN
-function getNextSunday5pm(){
-  const now=new Date();
-  const d=new Date(now);
-  d.setDate(now.getDate()+(7-now.getDay())%7);
-  d.setHours(17,0,0,0);
-  if(now>d) d.setDate(d.getDate()+7);
-  return d;
-}
+    // MAIN QTY
+    function changeMain(v) {
+      mainQty += v;
+      if (mainQty < 0) mainQty = 0;
+      if (mainQty > 5) mainQty = 5;
 
-function updateCountdown(){
-  const diff=getNextSunday5pm()-new Date();
-  const h=Math.floor(diff/1000/60/60);
-  const m=Math.floor((diff/1000/60)%60);
-  document.getElementById("countdown").innerText="Ends in "+h+"h "+m+"m";
-}
+      document.getElementById("qty").innerText = mainQty;
 
-setInterval(updateCountdown,1000);
-updateCountdown();
-</script>
+      if (mainQty > 0) {
+        document.getElementById("mainQ").classList.remove("hidden");
+        document.getElementById("odds").innerText =
+          mainQty + " entry → 1 in " + Math.floor(250 / mainQty);
+      } else {
+        document.getElementById("mainQ").classList.add("hidden");
+        document.getElementById("odds").innerText = "No entries selected";
+        mainCorrect = false;
+      }
+
+      updateTotals();
+    }
+
+    // DROP QTY
+    function changeDrop(v) {
+      dropQty += v;
+      if (dropQty < 0) dropQty = 0;
+
+      document.getElementById("dropQty").innerText = dropQty;
+
+      if (dropQty > 0) {
+        document.getElementById("dropQ").classList.remove("hidden");
+      } else {
+        document.getElementById("dropQ").classList.add("hidden");
+        dropCorrect = false;
+      }
+
+      updateTotals();
+    }
+
+    // ANSWERS
+    function selectMainAnswer(el, correct) {
+      document.querySelectorAll("#mainQ .option").forEach(o => o.classList.remove("correct","wrong"));
+      if (correct) {
+        el.classList.add("correct");
+        mainCorrect = true;
+      } else {
+        el.classList.add("wrong");
+        mainCorrect = false;
+      }
+    }
+
+    function selectDropAnswer(el, correct) {
+      document.querySelectorAll("#dropQ .option").forEach(o => o.classList.remove("correct","wrong"));
+      if (correct) {
+        el.classList.add("correct");
+        dropCorrect = true;
+      } else {
+        el.classList.add("wrong");
+        dropCorrect = false;
+      }
+    }
+
+    function selectPopupAnswer(el, correct) {
+      document.querySelectorAll("#popup .option").forEach(o => o.classList.remove("correct","wrong"));
+      if (correct) {
+        el.classList.add("correct");
+        popupCorrect = true;
+      } else {
+        el.classList.add("wrong");
+        popupCorrect = false;
+      }
+    }
+
+    // FLOW
+    function startCheckout() {
+      if (mainQty === 0) {
+        alert("Select entries first");
+        return;
+      }
+
+      if (!mainCorrect) {
+        alert("Answer the main question");
+        return;
+      }
+
+      document.getElementById("popup").style.display = "flex";
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function addDropAndCheckout(n) {
+      if (!popupCorrect) {
+        alert("Answer the drop question");
+        return;
+      }
+
+      dropQty += n;
+      goToCheckout();
+    }
+
+    function checkoutMainOnly() {
+      goToCheckout();
+    }
+
+    function checkoutDirect() {
+      if (dropQty === 0) {
+        alert("Select drop entries");
+        return;
+      }
+
+      if (!dropCorrect) {
+        alert("Answer drop question");
+        return;
+      }
+
+      goToCheckout();
+    }
+
+    async function goToCheckout() {
+      const res = await fetch("/.netlify/functions/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mainQty: mainQty,
+          dropQty: dropQty
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Checkout error");
+      }
+    }
+  </script>
 
 </body>
 </html>
