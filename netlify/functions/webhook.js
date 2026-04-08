@@ -29,46 +29,48 @@ exports.handler = async (event) => {
 
     const quantity = parseInt(session.metadata.quantity || 1);
 
-// MAIN DRAW UPDATE
-const { data } = await supabase
-  .from("main_draw")
-  .select("*")
-  .single();
+    const { data } = await supabase
+      .from("main_draw")
+      .select("*")
+      .single();
 
-let newTotal = data.total_entries + quantity;
+    const currentTotal = data.total_entries;
+    const max = data.max_entries;
 
-await supabase
-  .from("main_draw")
-  .update({
-    total_entries: newTotal
-  })
-  .eq("id", data.id);
-
-      const currentTotal = data.total_entries;
-      const max = data.max_entries;
-
-      // 🚨 HARD STOP
-      if (currentTotal >= max) {
-        return {
-          statusCode: 200,
-          body: "Draw already full",
-        };
-      }
-
-      // 🚨 Prevent oversell
-      let newTotal = currentTotal + qty;
-      if (newTotal > max) {
-        newTotal = max;
-      }
-
-      await supabase
-        .from("main_draw")
-        .update({
-          total_entries: newTotal,
-        })
-        .eq("id", data.id);
+    // 🚨 HARD STOP
+    if (currentTotal >= max) {
+      return {
+        statusCode: 200,
+        body: "Draw already full",
+      };
     }
+
+    // 🚨 Prevent oversell
+    let newTotal = currentTotal + quantity;
+    if (newTotal > max) {
+      newTotal = max;
+    }
+
+    await supabase
+      .from("main_draw")
+      .update({
+        total_entries: newTotal,
+      })
+      .eq("id", data.id);
   }
+
+  // ✅ TEMP TEST (REMOVE AFTER)
+  const { data } = await supabase
+    .from("main_draw")
+    .select("*")
+    .single();
+
+  await supabase
+    .from("main_draw")
+    .update({
+      total_entries: data.total_entries + 1,
+    })
+    .eq("id", data.id);
 
   return {
     statusCode: 200,
