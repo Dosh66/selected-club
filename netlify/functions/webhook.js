@@ -7,29 +7,6 @@ const supabase = createClient(
 );
 
 exports.handler = async (event) => {
-
-  // 🟡 TEST MODE (when opened in browser)
-  if (!event.body) {
-    console.log("Running test mode");
-
-    const { data } = await supabase
-      .from("main_draw")
-      .select("*")
-      .single();
-
-    await supabase
-      .from("main_draw")
-      .update({
-        total_entries: data.total_entries + 1,
-      })
-      .eq("id", data.id);
-
-    return {
-      statusCode: 200,
-      body: "Test increment success",
-    };
-  }
-
   const sig = event.headers["stripe-signature"];
 
   let stripeEvent;
@@ -47,7 +24,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // 🔵 REAL PAYMENT LOGIC
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
