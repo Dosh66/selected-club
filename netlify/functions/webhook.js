@@ -27,34 +27,37 @@ exports.handler = async (event) => {
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
-    const dropQty = parseInt(session.metadata.dropQty || 0);
+    const qty = parseInt(session.metadata.dropQty || 0);
 
-    if (dropQty > 0) {
+    if (qty > 0) {
       const { data } = await supabase
-        .from("entries")
+        .from("main_draw")
         .select("*")
         .single();
 
-      let newTotal = data.total_entries + dropQty;
+      const currentTotal = data.total_entries;
+      const max = data.max_entries;
 
-      if (newTotal >= data.trigger_number) {
-        const newTrigger = Math.floor(Math.random() * 41) + 80;
-
-        await supabase
-          .from("entries")
-          .update({
-            total_entries: 0,
-            trigger_number: newTrigger,
-          })
-          .eq("id", data.id);
-      } else {
-        await supabase
-          .from("entries")
-          .update({
-            total_entries: newTotal,
-          })
-          .eq("id", data.id);
+      // 🚨 HARD STOP
+      if (currentTotal >= max) {
+        return {
+          statusCode: 200,
+          body: "Draw already full",
+        };
       }
+
+      // 🚨 Prevent oversell
+      let newTotal = currentTotal + qty;
+      if (newTotal > max) {
+        newTotal = max;
+      }
+
+      await supabase
+        .from("main_draw")
+        .update({
+          total_entries: newTotal,
+        })
+        .eq("id", data.id);
     }
   }
 
