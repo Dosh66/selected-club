@@ -437,7 +437,7 @@
 
     <div class="block" style="margin-top:14px;">
   <div style="height:10px; background:#1c2a4a; border-radius:10px;">
-  <div style="width:0%; height:10px; background:#2ecc71; border-radius:10px;"></div>
+  <div id="progressBar" style="width:0%; height:10px; background:#2ecc71; border-radius:10px;"></div>
   </div>
   <div class="small" id="entriesText">Loading...</div>
 </div>
@@ -813,6 +813,8 @@ async function loadEntries() {
 
   document.getElementById("entriesText").innerText =
     `${remaining} / ${data.max_entries} entries remaining`;
+  const percentage = (data.total_entries / data.max_entries) * 100;
+document.getElementById("progressBar").style.width = percentage + "%";
 }
 
 loadEntries();
