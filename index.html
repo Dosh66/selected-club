@@ -815,12 +815,15 @@ async function loadEntries() {
 
   document.getElementById("entriesText").innerText =
     `${remaining} / ${data.max_entries} entries remaining`;
+
   const percentage = (data.total_entries / data.max_entries) * 100;
-document.getElementById("progressBar").style.width = percentage + "%";
-if (remaining <= 0) {
-  document.getElementById("enterBtn").innerText = "SOLD OUT";
-  document.getElementById("enterBtn").disabled = true;
-  document.getElementById("enterBtn").style.opacity = "0.5";
+  document.getElementById("progressBar").style.width = percentage + "%";
+
+  if (remaining <= 0) {
+    document.getElementById("enterBtn").innerText = "SOLD OUT";
+    document.getElementById("enterBtn").disabled = true;
+    document.getElementById("enterBtn").style.opacity = "0.5";
+  }
 }
 
 loadEntries();
