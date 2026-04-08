@@ -27,13 +27,22 @@ exports.handler = async (event) => {
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
-    const qty = parseInt(session.metadata.dropQty || 0);
+    const quantity = parseInt(session.metadata.quantity || 1);
 
-    if (qty > 0) {
-      const { data } = await supabase
-        .from("main_draw")
-        .select("*")
-        .single();
+// MAIN DRAW UPDATE
+const { data } = await supabase
+  .from("main_draw")
+  .select("*")
+  .single();
+
+let newTotal = data.total_entries + quantity;
+
+await supabase
+  .from("main_draw")
+  .update({
+    total_entries: newTotal
+  })
+  .eq("id", data.id);
 
       const currentTotal = data.total_entries;
       const max = data.max_entries;
