@@ -27,7 +27,9 @@ exports.handler = async (event) => {
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
-    const quantity = parseInt(session.metadata.quantity || 1);
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+const quantity = lineItems.data[0].quantity;
 
     const { data } = await supabase
       .from("main_draw")
