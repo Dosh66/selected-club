@@ -439,7 +439,7 @@
   <div style="height:10px; background:#1c2a4a; border-radius:10px;">
   <div style="width:0%; height:10px; background:#2ecc71; border-radius:10px;"></div>
   </div>
-  <div class="small">250 / 250 entries remaining</div>
+  <div class="small" id="entriesText">Loading...</div>
 </div>
 
     <!-- Main draw -->
@@ -804,6 +804,18 @@
       }
     }
   </script>
+<script>
+async function loadEntries() {
+  const res = await fetch("/.netlify/functions/get-entries");
+  const data = await res.json();
 
+  const remaining = data.max_entries - data.total_entries;
+
+  document.getElementById("entriesText").innerText =
+    `${remaining} / ${data.max_entries} entries remaining`;
+}
+
+loadEntries();
+</script>
 </body>
 </html>
