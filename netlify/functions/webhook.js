@@ -30,33 +30,36 @@ exports.handler = async (event) => {
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
 const quantity = lineItems.data[0].quantity;
+    const priceId = lineItems.data[0].price.id;
 
     const { data } = await supabase
       .from("main_draw")
       .select("*")
       .single();
 
-    const currentTotal = data.total_entries;
-    const max = data.max_entries;
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+const quantity = lineItems.data[0].quantity;
+const priceId = lineItems.data[0].price.id;
 
-    if (currentTotal >= max) {
-      return {
-        statusCode: 200,
-        body: "Draw already full",
-      };
-    }
+// MAIN DRAW
+if (priceId === "price_1TGyxX0JuSOSCs9W2yPqByNz") {
+  await supabase
+    .from("main_draw")
+    .update({
+      total_entries: supabase.raw(`total_entries + ${quantity}`)
+    })
+    .eq("id", 1);
+}
 
-    let newTotal = currentTotal + quantity;
-    if (newTotal > max) {
-      newTotal = max;
-    }
-
-    await supabase
-      .from("main_draw")
-      .update({
-        total_entries: newTotal,
-      })
-      .eq("id", data.id);
+// SELECTED DROP
+if (priceId === "price_1TGyzo0JuSOSCs9WnEZ1WYca") {
+  await supabase
+    .from("drops")
+    .update({
+      total_entries: supabase.raw(`total_entries + ${quantity}`)
+    })
+    .eq("is_active", true);
+}
   }
 
   return {
