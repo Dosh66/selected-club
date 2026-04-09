@@ -24,42 +24,34 @@ exports.handler = async (event) => {
     };
   }
 
+  // ✅ Only run when payment succeeds
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
+    // 🔥 Get Stripe data (ONLY ONCE)
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
-const quantity = lineItems.data[0].quantity;
+    const quantity = lineItems.data[0].quantity;
     const priceId = lineItems.data[0].price.id;
 
-    const { data } = await supabase
-      .from("main_draw")
-      .select("*")
-      .single();
+    // ===== MAIN DRAW =====
+    if (priceId === "price_1TGyxX0JuSOSCs9W2yPqByNz") {
+      await supabase
+        .from("main_draw")
+        .update({
+          total_entries: supabase.raw(`total_entries + ${quantity}`)
+        })
+        .eq("is_active", true);
+    }
 
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-const quantity = lineItems.data[0].quantity;
-const priceId = lineItems.data[0].price.id;
-
-// MAIN DRAW
-if (priceId === "price_1TGyxX0JuSOSCs9W2yPqByNz") {
-  await supabase
-    .from("main_draw")
-    .update({
-      total_entries: supabase.raw(`total_entries + ${quantity}`)
-    })
-    .eq("id", 1);
-}
-
-// SELECTED DROP
-if (priceId === "price_1TGyzo0JuSOSCs9WnEZ1WYca") {
-  await supabase
-    .from("drops")
-    .update({
-      total_entries: supabase.raw(`total_entries + ${quantity}`)
-    })
-    .eq("is_active", true);
-}
+    // ===== SELECTED DROP =====
+    if (priceId === "price_1TGyzo0JuSOSCs9WnEZ1WYca") {
+      await supabase
+        .from("drops")
+        .update({
+          total_entries: supabase.raw(`total_entries + ${quantity}`)
+        })
+        .eq("is_active", true);
+    }
   }
 
   return {
