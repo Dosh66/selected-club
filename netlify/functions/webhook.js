@@ -32,7 +32,8 @@ exports.handler = async (event) => {
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
     const quantity = lineItems.data[0].quantity;
     const priceId = lineItems.data[0].price.id;
-
+console.log("PRICE ID:", priceId);
+console.log("QUANTITY:", quantity);
     // ===== MAIN DRAW =====
     if (priceId === "price_1TGyxX0JuSOSCs9W2yPqByNz") {
       await supabase
