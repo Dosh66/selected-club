@@ -40,7 +40,7 @@ exports.handler = async (event) => {
         .update({
           total_entries: supabase.raw(`total_entries + ${quantity}`)
         })
-        .eq("is_active", true);
+        .eq("is_closed", false);
     }
 
     // ===== SELECTED DROP =====
