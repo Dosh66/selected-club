@@ -1,3 +1,4 @@
+console.log("🚀 NEW WEBHOOK VERSION LIVE");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require("@supabase/supabase-js");
 
