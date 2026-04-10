@@ -14,11 +14,13 @@ exports.handler = async (event) => {
   let stripeEvent;
 
   // =========================
-  // 🔐 VERIFY STRIPE WEBHOOK
+  // 🔐 VERIFY STRIPE WEBHOOK (FIXED)
   // =========================
   try {
+    const rawBody = Buffer.from(event.body, "utf8");
+
     stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -38,7 +40,6 @@ exports.handler = async (event) => {
 
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-    // ✅ Safety check
     if (!lineItems.data.length) {
       console.log("❌ No line items found");
       return { statusCode: 200, body: "No items" };
@@ -66,7 +67,6 @@ exports.handler = async (event) => {
 
       let newTotal = data.total_entries + quantity;
 
-      // 🎯 SOLD OUT
       if (newTotal >= data.max_entries) {
         newTotal = data.max_entries;
 
@@ -74,16 +74,14 @@ exports.handler = async (event) => {
           .from("main_draw")
           .update({
             total_entries: newTotal,
-            is_closed: true
+            is_closed: true,
           })
           .eq("id", data.id);
 
         console.log("🎯 MAIN DRAW SOLD OUT");
-
         return;
       }
 
-      // 📈 NORMAL UPDATE
       await supabase
         .from("main_draw")
         .update({ total_entries: newTotal })
@@ -116,8 +114,9 @@ exports.handler = async (event) => {
       if (newTotal >= data.trigger_number) {
         newTotal = data.trigger_number;
 
-        // 🎲 Random winner (1 → total entries)
-        const winnerNumber = Math.floor(Math.random() * newTotal) + 1;
+        // 🎲 Random winner (NOT the trigger)
+        const winnerNumber =
+          Math.floor(Math.random() * newTotal) + 1;
 
         console.log("🏆 WINNER NUMBER:", winnerNumber);
 
@@ -128,14 +127,14 @@ exports.handler = async (event) => {
             total_entries: newTotal,
             winner_number: winnerNumber,
             is_active: false,
-            is_closed: true
+            is_closed: true,
           })
           .eq("id", data.id);
 
         console.log("🎉 DROP CLOSED");
 
         // =========================
-        // 🔁 CREATE NEW DROP
+        // 🔁 CREATE NEW DROP (RANDOM 80–120)
         // =========================
         const newTrigger =
           Math.floor(Math.random() * (120 - 80 + 1)) + 80;
@@ -149,8 +148,8 @@ exports.handler = async (event) => {
               total_entries: 0,
               trigger_number: newTrigger,
               is_active: true,
-              is_closed: false
-            }
+              is_closed: false,
+            },
           ]);
 
         console.log("🔁 NEW DROP CREATED");
