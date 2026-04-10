@@ -1,4 +1,5 @@
 console.log("🚀 NEW WEBHOOK VERSION LIVE");
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require("@supabase/supabase-js");
 
@@ -12,6 +13,9 @@ exports.handler = async (event) => {
 
   let stripeEvent;
 
+  // =========================
+  // 🔐 VERIFY STRIPE WEBHOOK
+  // =========================
   try {
     stripeEvent = stripe.webhooks.constructEvent(
       event.body,
@@ -26,10 +30,19 @@ exports.handler = async (event) => {
     };
   }
 
+  // =========================
+  // 💳 PAYMENT COMPLETED
+  // =========================
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+    // ✅ Safety check
+    if (!lineItems.data.length) {
+      console.log("❌ No line items found");
+      return { statusCode: 200, body: "No items" };
+    }
 
     const quantity = lineItems.data[0].quantity;
     const priceId = lineItems.data[0].price.id;
@@ -37,35 +50,40 @@ exports.handler = async (event) => {
     console.log("✅ Payment received:", priceId, quantity);
 
     // =========================
-    // MAIN DRAW (£6)
+    // 🟡 MAIN DRAW (£6)
     // =========================
     if (priceId === "price_1TGyxX0JuSOSCs9W2yPqByNz") {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("main_draw")
         .select("*")
         .eq("is_closed", false)
         .single();
 
-      if (!data) return;
+      if (error || !data) {
+        console.log("❌ Main draw fetch error:", error);
+        return;
+      }
 
       let newTotal = data.total_entries + quantity;
 
-if (newTotal >= data.max_entries) {
-  newTotal = data.max_entries;
+      // 🎯 SOLD OUT
+      if (newTotal >= data.max_entries) {
+        newTotal = data.max_entries;
 
-  await supabase
-    .from("main_draw")
-    .update({
-      total_entries: newTotal,
-      is_closed: true
-    })
-    .eq("id", data.id);
+        await supabase
+          .from("main_draw")
+          .update({
+            total_entries: newTotal,
+            is_closed: true
+          })
+          .eq("id", data.id);
 
-  console.log("🎯 MAIN DRAW SOLD OUT");
+        console.log("🎯 MAIN DRAW SOLD OUT");
 
-  return;
-}
+        return;
+      }
 
+      // 📈 NORMAL UPDATE
       await supabase
         .from("main_draw")
         .update({ total_entries: newTotal })
@@ -73,19 +91,76 @@ if (newTotal >= data.max_entries) {
     }
 
     // =========================
-    // SELECTED DROP (£3)
+    // 🔵 SELECTED DROP (£3)
     // =========================
     if (priceId === "price_1TGyzo0JuSOSCs9WnEZ1WYca") {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("drops")
         .select("*")
         .eq("is_active", true)
         .single();
 
-      if (!data) return;
+      if (error || !data) {
+        console.log("❌ Drop fetch error:", error);
+        return;
+      }
 
-      const newTotal = data.total_entries + quantity;
+      let newTotal = data.total_entries + quantity;
 
+      console.log("🎟️ New total entries:", newTotal);
+      console.log("🎯 Trigger number:", data.trigger_number);
+
+      // =========================
+      // 🎯 TRIGGER HIT → PICK WINNER
+      // =========================
+      if (newTotal >= data.trigger_number) {
+        newTotal = data.trigger_number;
+
+        // 🎲 Random winner (1 → total entries)
+        const winnerNumber = Math.floor(Math.random() * newTotal) + 1;
+
+        console.log("🏆 WINNER NUMBER:", winnerNumber);
+
+        // 🔒 Close current drop
+        await supabase
+          .from("drops")
+          .update({
+            total_entries: newTotal,
+            winner_number: winnerNumber,
+            is_active: false,
+            is_closed: true
+          })
+          .eq("id", data.id);
+
+        console.log("🎉 DROP CLOSED");
+
+        // =========================
+        // 🔁 CREATE NEW DROP
+        // =========================
+        const newTrigger =
+          Math.floor(Math.random() * (120 - 80 + 1)) + 80;
+
+        console.log("🎯 New trigger generated:", newTrigger);
+
+        await supabase
+          .from("drops")
+          .insert([
+            {
+              total_entries: 0,
+              trigger_number: newTrigger,
+              is_active: true,
+              is_closed: false
+            }
+          ]);
+
+        console.log("🔁 NEW DROP CREATED");
+
+        return;
+      }
+
+      // =========================
+      // 📈 NORMAL UPDATE
+      // =========================
       await supabase
         .from("drops")
         .update({ total_entries: newTotal })
@@ -93,6 +168,9 @@ if (newTotal >= data.max_entries) {
     }
   }
 
+  // =========================
+  // ✅ SUCCESS RESPONSE
+  // =========================
   return {
     statusCode: 200,
     body: "ok",
