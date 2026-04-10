@@ -48,7 +48,23 @@ exports.handler = async (event) => {
 
       if (!data) return;
 
-      const newTotal = data.total_entries + quantity;
+      let newTotal = data.total_entries + quantity;
+
+if (newTotal >= data.max_entries) {
+  newTotal = data.max_entries;
+
+  await supabase
+    .from("main_draw")
+    .update({
+      total_entries: newTotal,
+      is_closed: true
+    })
+    .eq("id", data.id);
+
+  console.log("🎯 MAIN DRAW SOLD OUT");
+
+  return;
+}
 
       await supabase
         .from("main_draw")
