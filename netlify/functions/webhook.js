@@ -28,6 +28,10 @@ exports.handler = async (event) => {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+
+    // 🔥 NEW: log event type
+    console.log("📦 EVENT TYPE:", stripeEvent.type);
+
   } catch (err) {
     console.log("❌ Webhook signature error:", err.message);
     return {
@@ -40,6 +44,7 @@ exports.handler = async (event) => {
   // 💳 PAYMENT COMPLETED
   // =========================
   if (stripeEvent.type === "checkout.session.completed") {
+
     // 🔥 respond immediately to Stripe
     setTimeout(async () => {
       try {
@@ -177,6 +182,7 @@ exports.handler = async (event) => {
           console.log("🧪 DROP UPDATE:", updateData);
           console.log("❌ DROP UPDATE ERROR:", updateError);
         }
+
       } catch (err) {
         console.log("❌ Async error:", err);
       }
@@ -188,6 +194,7 @@ exports.handler = async (event) => {
     };
   }
 
+  // fallback
   return {
     statusCode: 200,
     body: "ok",
