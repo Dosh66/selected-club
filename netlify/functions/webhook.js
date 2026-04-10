@@ -14,13 +14,10 @@ exports.handler = async (event) => {
   const sig = event.headers["stripe-signature"];
   let stripeEvent;
 
-  // =========================
-  // 🔐 VERIFY STRIPE WEBHOOK (FIXED)
-  // =========================
   try {
     const body = event.isBase64Encoded
-      ? Buffer.from(event.body, "base64").toString("utf8")
-      : event.body;
+      ? Buffer.from(event.body, "base64")
+      : Buffer.from(event.body, "utf8");
 
     stripeEvent = stripe.webhooks.constructEvent(
       body,
@@ -35,9 +32,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // =========================
-  // 💳 PAYMENT COMPLETED
-  // =========================
   if (stripeEvent.type === "checkout.session.completed") {
     const session = stripeEvent.data.object;
 
@@ -45,7 +39,10 @@ exports.handler = async (event) => {
 
     if (!lineItems.data.length) {
       console.log("❌ No line items found");
-      return { statusCode: 200, body: "No items" };
+      return {
+        statusCode: 200,
+        body: "No items",
+      };
     }
 
     const quantity = lineItems.data[0].quantity;
@@ -65,7 +62,10 @@ exports.handler = async (event) => {
 
       if (error || !data) {
         console.log("❌ Main draw fetch error:", error);
-        return;
+        return {
+          statusCode: 500,
+          body: "Main draw fetch failed",
+        };
       }
 
       let newTotal = data.total_entries + quantity;
@@ -73,7 +73,7 @@ exports.handler = async (event) => {
       if (newTotal >= data.max_entries) {
         newTotal = data.max_entries;
 
-        await supabase
+        const { error: updateError } = await supabase
           .from("main_draw")
           .update({
             total_entries: newTotal,
@@ -81,14 +81,34 @@ exports.handler = async (event) => {
           })
           .eq("id", data.id);
 
+        if (updateError) {
+          console.log("❌ Main draw sold out update error:", updateError);
+          return {
+            statusCode: 500,
+            body: "Main draw update failed",
+          };
+        }
+
         console.log("🎯 MAIN DRAW SOLD OUT");
-        return;
+
+        return {
+          statusCode: 200,
+          body: "ok",
+        };
       }
 
-      await supabase
+      const { error: updateError } = await supabase
         .from("main_draw")
         .update({ total_entries: newTotal })
         .eq("id", data.id);
+
+      if (updateError) {
+        console.log("❌ Main draw normal update error:", updateError);
+        return {
+          statusCode: 500,
+          body: "Main draw update failed",
+        };
+      }
     }
 
     // =========================
@@ -103,28 +123,27 @@ exports.handler = async (event) => {
 
       if (error || !data) {
         console.log("❌ Drop fetch error:", error);
-        return;
+        return {
+          statusCode: 500,
+          body: "Drop fetch failed",
+        };
       }
+
+      console.log("🆔 ACTIVE DROP ID:", data.id);
 
       let newTotal = data.total_entries + quantity;
 
       console.log("🎟️ New total entries:", newTotal);
       console.log("🎯 Trigger number:", data.trigger_number);
 
-      // =========================
-      // 🎯 TRIGGER HIT → PICK WINNER
-      // =========================
       if (newTotal >= data.trigger_number) {
         newTotal = data.trigger_number;
 
-        // 🎲 Random winner (NOT trigger)
-        const winnerNumber =
-          Math.floor(Math.random() * newTotal) + 1;
+        const winnerNumber = Math.floor(Math.random() * newTotal) + 1;
 
         console.log("🏆 WINNER NUMBER:", winnerNumber);
 
-        // 🔒 Close current drop
-        await supabase
+        const { error: closeError } = await supabase
           .from("drops")
           .update({
             total_entries: newTotal,
@@ -134,17 +153,22 @@ exports.handler = async (event) => {
           })
           .eq("id", data.id);
 
+        if (closeError) {
+          console.log("❌ DROP CLOSE ERROR:", closeError);
+          return {
+            statusCode: 500,
+            body: "Drop close failed",
+          };
+        }
+
         console.log("🎉 DROP CLOSED");
 
-        // =========================
-        // 🔁 CREATE NEW DROP (80–120)
-        // =========================
         const newTrigger =
           Math.floor(Math.random() * (120 - 80 + 1)) + 80;
 
         console.log("🎯 New trigger generated:", newTrigger);
 
-        await supabase
+        const { error: insertError } = await supabase
           .from("drops")
           .insert([
             {
@@ -155,24 +179,37 @@ exports.handler = async (event) => {
             },
           ]);
 
+        if (insertError) {
+          console.log("❌ NEW DROP INSERT ERROR:", insertError);
+          return {
+            statusCode: 500,
+            body: "New drop insert failed",
+          };
+        }
+
         console.log("🔁 NEW DROP CREATED");
 
-        return;
+        return {
+          statusCode: 200,
+          body: "ok",
+        };
       }
 
-      // =========================
-      // 📈 NORMAL UPDATE
-      // =========================
-      await supabase
+      const { error: updateError } = await supabase
         .from("drops")
         .update({ total_entries: newTotal })
         .eq("id", data.id);
+
+      if (updateError) {
+        console.log("❌ DROP NORMAL UPDATE ERROR:", updateError);
+        return {
+          statusCode: 500,
+          body: "Drop update failed",
+        };
+      }
     }
   }
 
-  // =========================
-  // ✅ SUCCESS RESPONSE
-  // =========================
   return {
     statusCode: 200,
     body: "ok",
