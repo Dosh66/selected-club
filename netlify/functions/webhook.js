@@ -10,7 +10,7 @@ const supabase = createClient(
 
 exports.handler = async (event) => {
   const sig = event.headers["stripe-signature"];
-
+console.log("🔑 KEY CHECK:", process.env.SUPABASE_SERVICE_KEY?.slice(0, 20));
   let stripeEvent;
 
   // =========================
