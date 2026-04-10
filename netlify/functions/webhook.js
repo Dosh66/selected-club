@@ -9,18 +9,21 @@ const supabase = createClient(
 );
 
 exports.handler = async (event) => {
-  const sig = event.headers["stripe-signature"];
+  console.log("🔥 WEBHOOK HIT");
 
+  const sig = event.headers["stripe-signature"];
   let stripeEvent;
 
   // =========================
   // 🔐 VERIFY STRIPE WEBHOOK (FIXED)
   // =========================
   try {
-    const rawBody = Buffer.from(event.body, "utf8");
+    const body = event.isBase64Encoded
+      ? Buffer.from(event.body, "base64").toString("utf8")
+      : event.body;
 
     stripeEvent = stripe.webhooks.constructEvent(
-      rawBody,
+      body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -114,7 +117,7 @@ exports.handler = async (event) => {
       if (newTotal >= data.trigger_number) {
         newTotal = data.trigger_number;
 
-        // 🎲 Random winner (NOT the trigger)
+        // 🎲 Random winner (NOT trigger)
         const winnerNumber =
           Math.floor(Math.random() * newTotal) + 1;
 
@@ -134,7 +137,7 @@ exports.handler = async (event) => {
         console.log("🎉 DROP CLOSED");
 
         // =========================
-        // 🔁 CREATE NEW DROP (RANDOM 80–120)
+        // 🔁 CREATE NEW DROP (80–120)
         // =========================
         const newTrigger =
           Math.floor(Math.random() * (120 - 80 + 1)) + 80;
