@@ -46,6 +46,18 @@ exports.handler = async (event) => {
     try {
       const session = stripeEvent.data.object;
 
+      // 🛑 PREVENT DUPLICATES
+      const { data: existingPayment } = await supabase
+        .from("processed_payments")
+        .select("id")
+        .eq("stripe_session_id", session.id)
+        .single();
+
+      if (existingPayment) {
+        console.log("⚠️ Payment already processed:", session.id);
+        return { statusCode: 200, body: "ok" };
+      }
+
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
       if (!lineItems.data.length) {
@@ -57,6 +69,15 @@ exports.handler = async (event) => {
       const priceId = lineItems.data[0].price.id;
 
       console.log("✅ Payment received:", priceId, quantity);
+
+      // 💾 SAVE PAYMENT (mark as processed)
+      await supabase.from("processed_payments").insert([
+        {
+          stripe_session_id: session.id,
+          price_id: priceId,
+          quantity: quantity,
+        },
+      ]);
 
       // =========================
       // 🟡 MAIN DRAW (£6)
