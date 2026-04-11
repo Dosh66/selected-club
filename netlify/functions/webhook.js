@@ -46,12 +46,17 @@ exports.handler = async (event) => {
     try {
       const session = stripeEvent.data.object;
 
+      // =========================
       // 🛑 PREVENT DUPLICATES
-      const { data: existingPayment } = await supabase
+      // =========================
+      const { data: existingPayment, error: existingError } = await supabase
         .from("processed_payments")
         .select("id")
         .eq("stripe_session_id", session.id)
-        .single();
+        .maybeSingle();
+
+      console.log("🔍 EXISTING PAYMENT:", existingPayment);
+      console.log("❌ EXISTING PAYMENT ERROR:", existingError);
 
       if (existingPayment) {
         console.log("⚠️ Payment already processed:", session.id);
@@ -70,14 +75,22 @@ exports.handler = async (event) => {
 
       console.log("✅ Payment received:", priceId, quantity);
 
-      // 💾 SAVE PAYMENT (mark as processed)
-      await supabase.from("processed_payments").insert([
-        {
-          stripe_session_id: session.id,
-          price_id: priceId,
-          quantity: quantity,
-        },
-      ]);
+      // =========================
+      // 💾 SAVE PAYMENT
+      // =========================
+      const { data: savedPayment, error: savedPaymentError } = await supabase
+        .from("processed_payments")
+        .insert([
+          {
+            stripe_session_id: session.id,
+            price_id: priceId,
+            quantity: quantity,
+          },
+        ])
+        .select();
+
+      console.log("💾 SAVED PAYMENT:", savedPayment);
+      console.log("❌ SAVED PAYMENT ERROR:", savedPaymentError);
 
       // =========================
       // 🟡 MAIN DRAW (£6)
@@ -105,7 +118,8 @@ exports.handler = async (event) => {
               total_entries: newTotal,
               is_closed: true,
             })
-            .eq("id", data.id);
+            .eq("id", data.id)
+            .select();
 
           console.log("🧪 MAIN DRAW UPDATE:", updateData);
           console.log("❌ MAIN DRAW UPDATE ERROR:", updateError);
@@ -117,7 +131,8 @@ exports.handler = async (event) => {
         const { data: updateData, error: updateError } = await supabase
           .from("main_draw")
           .update({ total_entries: newTotal })
-          .eq("id", data.id);
+          .eq("id", data.id)
+          .select();
 
         console.log("🧪 MAIN DRAW UPDATE:", updateData);
         console.log("❌ MAIN DRAW UPDATE ERROR:", updateError);
@@ -159,7 +174,8 @@ exports.handler = async (event) => {
               is_active: false,
               is_closed: true,
             })
-            .eq("id", data.id);
+            .eq("id", data.id)
+            .select();
 
           console.log("🧪 DROP CLOSE:", closeData);
           console.log("❌ DROP CLOSE ERROR:", closeError);
@@ -180,7 +196,8 @@ exports.handler = async (event) => {
                 is_active: true,
                 is_closed: false,
               },
-            ]);
+            ])
+            .select();
 
           console.log("🧪 NEW DROP INSERT:", insertData);
           console.log("❌ NEW DROP INSERT ERROR:", insertError);
@@ -194,7 +211,8 @@ exports.handler = async (event) => {
         const { data: updateData, error: updateError } = await supabase
           .from("drops")
           .update({ total_entries: newTotal })
-          .eq("id", data.id);
+          .eq("id", data.id)
+          .select();
 
         console.log("🧪 DROP UPDATE:", updateData);
         console.log("❌ DROP UPDATE ERROR:", updateError);
