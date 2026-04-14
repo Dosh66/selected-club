@@ -318,6 +318,15 @@
       display: none !important;
     }
 
+    .drop-counter {
+      margin-top: 12px;
+      text-align: center;
+      color: var(--gold);
+      font-size: 15px;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
     /* Popup */
     .popup {
       position: fixed;
@@ -436,11 +445,11 @@
     </div>
 
     <div class="block" style="margin-top:14px;">
-  <div style="height:10px; background:#1c2a4a; border-radius:10px;">
-  <div id="progressBar" style="width:0%; height:10px; background:#2ecc71; border-radius:10px;"></div>
-  </div>
-  <div class="small" id="entriesText">Loading...</div>
-</div>
+      <div style="height:10px; background:#1c2a4a; border-radius:10px;">
+        <div id="progressBar" style="width:0%; height:10px; background:#2ecc71; border-radius:10px;"></div>
+      </div>
+      <div class="small" id="entriesText">Loading...</div>
+    </div>
 
     <!-- Main draw -->
     <div class="card">
@@ -487,9 +496,9 @@
         <div class="option" onclick="selectMainAnswer(this,false)">M</div>
       </div>
 
-    <button id="enterBtn" class="btn primary" onclick="startCheckout()">
-  ENTER NOW
-</button>
+      <button id="enterBtn" class="btn primary" onclick="startCheckout()">
+        ENTER NOW
+      </button>
     </div>
 
     <!-- Why play -->
@@ -507,6 +516,10 @@
     <div class="section-title">Selected Drops</div>
     <div class="section-intro">
       Instant-win style entries. Every 80–120 entries produces a winner.
+    </div>
+
+    <div class="drop-counter" id="ticketCounter">
+      Loading tickets...
     </div>
 
     <div class="card">
@@ -595,8 +608,7 @@
         <div class="block-subtitle">What is 2 + 3?</div>
 
         <div class="option" onclick="selectPopupAnswer(this,false)">7</div>
-        <div class="option"
-                  <div class="option" onclick="selectPopupAnswer(this,true)">5</div>
+        <div class="option" onclick="selectPopupAnswer(this,true)">5</div>
         <div class="option" onclick="selectPopupAnswer(this,false)">9</div>
       </div>
 
@@ -611,9 +623,10 @@
       <button class="btn dark" onclick="checkoutMainOnly()">
         Skip for now
       </button>
-
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
     let mainQty = 0;
@@ -622,6 +635,11 @@
     let mainCorrect = false;
     let dropCorrect = false;
     let popupCorrect = false;
+
+    const supabaseClient = supabase.createClient(
+      "https://vsjogbiquxmbwiacvjym.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzam9nYmlxdXhtYndpYWN2anltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjA5MzAsImV4cCI6MjA5MDUzNjkzMH0.mI9z3D_oIsOb1crnx8_tzj3J3w5Cq7VBVXIfkEsgsH0"
+    );
 
     // COUNTDOWN
     function getNextSunday5pm() {
@@ -651,182 +669,4 @@
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
       document.getElementById("countdown").innerText =
-        days + "d / " + hours + "h / " + mins + "m";
-    }
-
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-
-    // TOTALS
-    function updateTotals() {
-      const mainTotal = mainQty * 6;
-      const dropTotal = dropQty * 3;
-      const total = mainTotal + dropTotal;
-
-      document.getElementById("mainTotal").innerText = "£" + mainTotal;
-      document.getElementById("dropTotal").innerText = "£" + dropTotal;
-      document.getElementById("grandTotal").innerText = "£" + total;
-    }
-
-    // MAIN QTY
-    function changeMain(v) {
-      mainQty += v;
-      if (mainQty < 0) mainQty = 0;
-      if (mainQty > 5) mainQty = 5;
-
-      document.getElementById("qty").innerText = mainQty;
-
-      if (mainQty > 0) {
-        document.getElementById("mainQ").classList.remove("hidden");
-        document.getElementById("odds").innerText =
-          mainQty + " entry → 1 in " + Math.floor(250 / mainQty);
-      } else {
-        document.getElementById("mainQ").classList.add("hidden");
-        document.getElementById("odds").innerText = "No entries selected";
-        mainCorrect = false;
-      }
-
-      updateTotals();
-    }
-
-    // DROP QTY
-    function changeDrop(v) {
-      dropQty += v;
-      if (dropQty < 0) dropQty = 0;
-
-      document.getElementById("dropQty").innerText = dropQty;
-
-      if (dropQty > 0) {
-        document.getElementById("dropQ").classList.remove("hidden");
-      } else {
-        document.getElementById("dropQ").classList.add("hidden");
-        dropCorrect = false;
-      }
-
-      updateTotals();
-    }
-
-    // ANSWERS
-    function selectMainAnswer(el, correct) {
-      document.querySelectorAll("#mainQ .option").forEach(o => o.classList.remove("correct","wrong"));
-      if (correct) {
-        el.classList.add("correct");
-        mainCorrect = true;
-      } else {
-        el.classList.add("wrong");
-        mainCorrect = false;
-      }
-    }
-
-    function selectDropAnswer(el, correct) {
-      document.querySelectorAll("#dropQ .option").forEach(o => o.classList.remove("correct","wrong"));
-      if (correct) {
-        el.classList.add("correct");
-        dropCorrect = true;
-      } else {
-        el.classList.add("wrong");
-        dropCorrect = false;
-      }
-    }
-
-    function selectPopupAnswer(el, correct) {
-      document.querySelectorAll("#popup .option").forEach(o => o.classList.remove("correct","wrong"));
-      if (correct) {
-        el.classList.add("correct");
-        popupCorrect = true;
-      } else {
-        el.classList.add("wrong");
-        popupCorrect = false;
-      }
-    }
-
-    // FLOW
-    function startCheckout() {
-      if (mainQty === 0) {
-        alert("Select entries first");
-        return;
-      }
-
-      if (!mainCorrect) {
-        alert("Answer the main question");
-        return;
-      }
-
-      document.getElementById("popup").style.display = "flex";
-    }
-
-    function closePopup() {
-      document.getElementById("popup").style.display = "none";
-    }
-
-    function addDropAndCheckout(n) {
-      if (!popupCorrect) {
-        alert("Answer the drop question");
-        return;
-      }
-
-      dropQty += n;
-      goToCheckout();
-    }
-
-    function checkoutMainOnly() {
-      goToCheckout();
-    }
-
-    function checkoutDirect() {
-      if (dropQty === 0) {
-        alert("Select drop entries");
-        return;
-      }
-
-      if (!dropCorrect) {
-        alert("Answer drop question");
-        return;
-      }
-
-      goToCheckout();
-    }
-
-    async function goToCheckout() {
-      const res = await fetch("/.netlify/functions/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mainQty: mainQty,
-          dropQty: dropQty
-        })
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Checkout error");
-      }
-    }
-  </script>
-<script>
-async function loadEntries() {
-  const res = await fetch("/.netlify/functions/get-entries");
-  const data = await res.json();
-
-  const remaining = data.max_entries - data.total_entries;
-
-  document.getElementById("entriesText").innerText =
-    `${remaining} / ${data.max_entries} entries remaining`;
-
-  const percentage = (data.total_entries / data.max_entries) * 100;
-  document.getElementById("progressBar").style.width = percentage + "%";
-
-  if (remaining <= 0) {
-    document.getElementById("enterBtn").innerText = "SOLD OUT";
-    document.getElementById("enterBtn").disabled = true;
-    document.getElementById("enterBtn").style.opacity = "0.5";
-  }
-}
-
-loadEntries();
-</script>
-</body>
-</html>
+        days + "d / " + hours + "h / " + mins + "m
